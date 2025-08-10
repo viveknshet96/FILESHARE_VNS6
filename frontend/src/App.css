@@ -444,3 +444,18 @@
     text-align: center;
     margin: 1.5rem 0;
 }
+
+/* Add this to your App.css */
+.select-to-share {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+}
+
+.select-to-share label {
+    font-size: 0.9rem;
+    color: var(--text-muted-color);
+    cursor: pointer;
+}

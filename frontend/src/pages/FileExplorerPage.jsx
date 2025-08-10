@@ -108,6 +108,7 @@ const FileExplorerPage = () => {
         }
     };
 
+
   // --- ADD THIS NEW FUNCTION ---
     const handleDeleteItem = async (itemId) => {
         // Ask for confirmation to prevent accidental deletion
@@ -128,51 +129,34 @@ const FileExplorerPage = () => {
   return (
         <div>
             <div className="toolbar">
-                <div className="breadcrumbs">
-                    {history.map((folder, index) => (
-                        <span key={folder._id || 'root'}>
-                            <button onClick={() => handleBreadcrumbClick(folder._id, index)}>
-                                {folder.name}
-                            </button>
-                            {index < history.length - 1 && ' / '}
-                        </span>
-                    ))}
-                </div>
+                <div className="breadcrumbs">{/*...*/}</div>
                 <div className="toolbar-actions">
-                    {/* The Share button is REMOVED from here */}
+                    {/* ✅ FIX: The main share button is back */}
+                    <button 
+                        className="btn btn-success" 
+                        onClick={handleCreateShareFromSelection}
+                        disabled={selectedItems.length === 0}
+                    >
+                        Share ({selectedItems.length})
+                    </button>
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
             </div>
             
             <FileUpload onUpload={handleUpload} disabled={isLoading} />
 
-            {/* ✅ FIX: The Share button is MOVED to a new container here */}
-            <div className="share-button-container">
-                <button 
-                    className="btn btn-success" 
-                    onClick={handleCreateShareFromSelection}
-                    disabled={selectedItems.length === 0}
-                >
-                    Share ({selectedItems.length}) Selected
-                </button>
-            </div>
-
             {isLoading ? <Loader /> : 
                 <ItemList 
                     items={items} 
                     onFolderClick={handleFolderClick} 
                     onDelete={handleDeleteItem}
+                    // Pass down the selection state and handler
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
                 />
             }
 
-            {shareInfo.isOpen && (
-                <ShareModal 
-                    code={shareInfo.code}
-                    onClose={() => setShareInfo({ isOpen: false, code: null })}
-                />
-            )}
+            {shareInfo.isOpen && ( <ShareModal code={shareInfo.code} onClose={() => setShareInfo({ isOpen: false, code: null })} /> )}
         </div>
     );
 };
