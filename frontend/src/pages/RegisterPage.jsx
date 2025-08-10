@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
-import { toast } from 'react-hot-toast';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -12,15 +11,8 @@ const RegisterPage = () => {
 
     const onSubmit = async e => {
         e.preventDefault();
-        if (formData.password.length < 6) {
-            return toast.error('Password must be at least 6 characters');
-        }
-        // The register function from the context will handle the API call
-        const success = await register(formData);
-        if (success) {
-            // On success, navigate to the login page
-            navigate('/login');
-        }
+        // Pass the navigate function directly to the context
+        await register(formData, navigate);
     };
 
     return (
@@ -29,7 +21,7 @@ const RegisterPage = () => {
                 <h2>Create an Account</h2>
                 <input type="text" name="name" value={formData.name} onChange={onChange} placeholder="Name" required />
                 <input type="email" name="email" value={formData.email} onChange={onChange} placeholder="Email" required />
-                <input type="password" name="password" value={formData.password} onChange={onChange} placeholder="Password" required />
+                <input type="password" name="password" value={formData.password} onChange={onChange} placeholder="Password" required minLength="6" />
                 <button type="submit" className="btn">Register</button>
                 <p>Already have an account? <Link to="/login">Login</Link></p>
             </form>

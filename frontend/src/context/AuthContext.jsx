@@ -60,14 +60,13 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-     // ✅ THIS IS THE DEFINITIVE FIX
-    const login = async (formData, navigate) => {
+     const login = async (formData, navigate) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser(); // 1. Load user data
+            await loadUser();
             toast.success('Login successful!');
-            navigate('/'); // 2. Force the redirect to the main page
+            navigate('/');
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
@@ -79,14 +78,17 @@ export const AuthProvider = ({ children }) => {
         try {
             await axios.post('/api/auth/register', formData);
             toast.success('Registration successful! Please log in.');
-            navigate('/login'); // Redirect to login after successful registration
+            navigate('/login');
         } catch (err) {
-            const errorMsg = err.response?.data?.errors ? err.response.data.errors[0].msg : err.response.data.msg;
+            // ✅ This handles the 400 error and prevents the crash
+            const errorMsg = err.response?.data?.errors 
+                ? err.response.data.errors[0].msg 
+                : err.response?.data?.msg;
             toast.error(errorMsg || 'Registration failed.');
         }
     };
 
-     return (
+    return (
         <AuthContext.Provider value={{ state, login, register, dispatch }}>
             {children}
         </AuthContext.Provider>

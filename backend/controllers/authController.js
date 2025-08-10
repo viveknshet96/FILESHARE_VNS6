@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator'); // Import the validator result
 
 exports.registerUser = async (req, res) => {
-    // ✅ FIX: Check for validation errors first.
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -23,11 +22,8 @@ exports.registerUser = async (req, res) => {
         user.password = await bcrypt.hash(password, salt);
         await user.save();
 
-        const payload = { user: { id: user.id } };
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5d' }, (err, token) => {
-            if (err) throw err;
-            res.status(201).json({ token });
-        });
+        // We no longer send a token on register, user must log in
+        res.status(201).json({ msg: 'User registered successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
