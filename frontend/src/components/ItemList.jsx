@@ -2,27 +2,17 @@ import React from 'react';
 import { filesize } from 'filesize';
 import { getDownloadUrl } from '../api';
 
-// We provide default empty values for the selection props.
-const ItemList = ({ items, onFolderClick, onDelete, selectedItems = [], onSelectItem }) => {
+const ItemList = ({ items, onFolderClick, onDelete, onShareClick }) => {
     return (
         <div className="item-list">
             {items.map(item => (
                 <div 
                     key={item._id} 
-                    // The 'selected' class is now safely applied
-                    className={`item ${selectedItems.includes(item._id) ? 'selected' : ''}`}
+                    className="item"
                     onDoubleClick={item.type === 'folder' && onFolderClick ? () => onFolderClick(item) : null}
                 >
                     <div className="item-info">
-                        {/* THIS IS THE MAIN CHANGE: The checkbox only appears if 'onSelectItem' is provided */}
-                        {onSelectItem && (
-                            <input 
-                                type="checkbox" 
-                                className="item-checkbox"
-                                checked={selectedItems.includes(item._id)}
-                                onChange={() => onSelectItem(item._id)}
-                            />
-                        )}
+                        {/* Checkbox is now removed */}
                         <span className="item-icon">{item.type === 'folder' ? '📁' : '📄'}</span>
                         <span className="item-name">{item.name}</span>
                     </div>
@@ -33,6 +23,8 @@ const ItemList = ({ items, onFolderClick, onDelete, selectedItems = [], onSelect
                         {item.type === 'folder' && onFolderClick && (
                             <button onClick={() => onFolderClick(item)} className='btn'>Open</button>
                         )}
+                        {/* ✅ Individual "Share" button is back */}
+                        <button onClick={() => onShareClick(item._id)} className="btn btn-success">Share</button>
                         {onDelete && (
                             <button onClick={() => onDelete(item._id)} className="btn btn-danger">Delete</button>
                         )}

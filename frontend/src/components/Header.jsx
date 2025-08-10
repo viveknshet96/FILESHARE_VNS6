@@ -30,7 +30,7 @@ const Header = () => {
     return (
         <header className="header">
             <h1 className="header__title">
-                V<span>'Share</span>
+                V<h6>'</h6><span>Share</span>
             </h1>
             {isAuthenticated && user && (
                 <div className="header-user-info">

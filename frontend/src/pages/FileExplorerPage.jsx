@@ -14,7 +14,7 @@ const FileExplorerPage = () => {
   // NEW STATE: To control the share modal
   const [shareInfo, setShareInfo] = useState({ isOpen: false, code: null });
   // NEW STATE: To track which items are selected
-  const [selectedItems, setSelectedItems] = useState([]);
+  // ===================const [selectedItems, setSelectedItems] = useState([]);
 
   const loadItems = async (folderId) => {
     setIsLoading(true);
@@ -72,13 +72,13 @@ const FileExplorerPage = () => {
 
   // NEW FUNCTION: To handle the API call and open the modal
   const handleShareItem = async (itemId) => {
-    try {
-      const response = await createShareLink(itemId);
-      setShareInfo({ isOpen: true, code: response.data.code });
-    } catch (error) {
-      toast.error("Failed to create share link.");
-    }
-  };
+        try {
+            const response = await createShareLink(itemId);
+            setShareInfo({ isOpen: true, code: response.data.code });
+        } catch (error) {
+            toast.error("Failed to create share link.");
+        }
+    };
 
   // NEW FUNCTION: To handle checking/unchecking items
     const handleSelectItem = (itemId) => {
@@ -124,54 +124,31 @@ const FileExplorerPage = () => {
             toast.error(error.response?.data?.msg || 'Could not delete the item.');
         }
     };
-
-  return (
-    <div>
-            {/* THIS TOOLBAR CONTAINS THE BREADCRUMBS AND ACTION BUTTONS */}
+return (
+        <div>
             <div className="toolbar">
-                <div className="breadcrumbs">
-                    {history.map((folder, index) => (
-                        <span key={folder._id || 'root'}>
-                            <button onClick={() => handleBreadcrumbClick(folder._id, index)}>
-                                {folder.name}
-                            </button>
-                            {index < history.length - 1 && ' / '}
-                        </span>
-                    ))}
-                </div>
+                <div className="breadcrumbs">{/*...*/}</div>
                 <div className="toolbar-actions">
-                    <button 
-                        className="btn btn-success" 
-                        onClick={handleCreateShareFromSelection}
-                        disabled={selectedItems.length === 0}
-                    >
-                        Share ({selectedItems.length})
-                    </button>
+                    {/* The main 'Share' button is now removed */}
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
-      </div>
+            </div>
+            
+            <FileUpload onUpload={handleUpload} disabled={isLoading} />
 
-      <FileUpload onUpload={handleUpload} disabled={isLoading} />
-
-      {isLoading ? <Loader /> : 
+            {isLoading ? <Loader /> : 
                 <ItemList 
                     items={items} 
                     onFolderClick={handleFolderClick} 
                     onDelete={handleDeleteItem}
-                    selectedItems={selectedItems}
-                    onSelectItem={handleSelectItem}
+                    // Pass the handler for the individual share button
+                    onShareClick={handleShareItem}
                 />
-      }
+            }
 
-      {/* NEW: Render the modal when its state is open */}
-      {shareInfo.isOpen && (
-        <ShareModal
-          code={shareInfo.code}
-          onClose={() => setShareInfo({ isOpen: false, code: null })}
-        />
-      )}
-    </div>
-  );
+            {shareInfo.isOpen && ( <ShareModal code={shareInfo.code} onClose={() => setShareInfo({ isOpen: false, code: null })} /> )}
+        </div>
+    );
 };
 
 export default FileExplorerPage;
