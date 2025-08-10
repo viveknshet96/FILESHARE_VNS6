@@ -1,9 +1,7 @@
 const Item = require('../models/Item');
 const User = require('../models/User');
-const { customAlphabet } = require('nanoid');
 
-const generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
-const GUEST_USER_EMAIL = 'guest@vshare-guest.com'; // Use the email you created the guest user with
+const GUEST_USER_EMAIL = 'guest@vshare.com';
 
 // This function finds the guest user's ID on server startup for efficiency
 let guestUserId = null;
@@ -41,7 +39,7 @@ exports.uploadGuestFiles = async (req, res) => {
             fileName: file.filename,
             path: file.path,
             size: file.size,
-            expiresAt: expirationDate,
+            expiresAt: expirationDate, // Set the expiration date for auto-deletion
         }));
 
         const insertedFiles = await Item.insertMany(fileItems);

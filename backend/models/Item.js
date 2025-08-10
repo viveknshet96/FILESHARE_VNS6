@@ -37,7 +37,7 @@ const ItemSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        index: { expires: 0 } 
+        index: { expires: '24h' }
     },
 });
 

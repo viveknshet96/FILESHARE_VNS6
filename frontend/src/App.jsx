@@ -8,6 +8,7 @@ import FileExplorerPage from './pages/FileExplorerPage';
 import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import GuestPage from './pages/GuestPage';
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
             )}
             <main>
                 <Routes>
+                    <Route path="/guest" element={<GuestPage />} />
                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
                     <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />

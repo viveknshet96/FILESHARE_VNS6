@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import FileUpload from '../components/FileUpload';
 import ShareModal from '../components/ShareModal';
 import Loader from '../components/Loader';
-import ItemList from '../components/ItemList'; // Import the ItemList component
+import ItemList from '../components/ItemList';
 import { createShareLink } from '../api';
 
 // A separate upload function for the public guest route
@@ -20,8 +20,6 @@ const uploadGuestFiles = (files, onUploadProgress) => {
 const GuestPage = () => {
     const [shareInfo, setShareInfo] = useState({ isOpen: false, code: null });
     const [isLoading, setIsLoading] = useState(false);
-    
-    // ✅ NEW: State to hold the files uploaded in this session
     const [uploadedItems, setUploadedItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
 
@@ -29,11 +27,8 @@ const GuestPage = () => {
         if (!files || files.length === 0) return;
         setIsLoading(true);
         try {
-            // Step 1: Upload the files using the guest route
             const uploadResponse = await uploadGuestFiles(Array.from(files));
-            // ✅ NEW: Save the uploaded files to our state to display them
             setUploadedItems(uploadResponse.data);
-            // ✅ NEW: Automatically select all uploaded files for convenience
             setSelectedItems(uploadResponse.data.map(item => item._id));
             toast.success('Files uploaded! Ready to share.');
         } catch (error) {
@@ -60,7 +55,7 @@ const GuestPage = () => {
         try {
             const shareResponse = await createShareLink(selectedItems);
             setShareInfo({ isOpen: true, code: shareResponse.data.code });
-            setUploadedItems([]); // Clear the list after sharing
+            setUploadedItems([]);
             setSelectedItems([]);
         } catch (error) {
             toast.error('Failed to create share link.');
@@ -76,7 +71,6 @@ const GuestPage = () => {
             
             <FileUpload onUpload={handleGuestUpload} disabled={isLoading} />
 
-            {/* ✅ NEW: Share button is now below the upload area */}
             <div className="share-button-container">
                  <button 
                     className="btn btn-success" 
@@ -89,13 +83,11 @@ const GuestPage = () => {
             
             {isLoading && <Loader />}
 
-            {/* ✅ NEW: Display the list of uploaded files */}
             {uploadedItems.length > 0 && !isLoading && (
                  <ItemList 
                     items={uploadedItems}
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
-                    // We don't pass folder or delete handlers for guests
                 />
             )}
             

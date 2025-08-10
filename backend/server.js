@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const os = require('os');
 const itemRoutes = require('./routes/items'); // This is the corrected line
+const guestRoutes = require('./routes/guest');
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/items', itemRoutes); // This is the corrected line
+app.use('/api/guest', guestRoutes);
 
 // Function to get local network IP
 const getLocalIpAddress = () => {
