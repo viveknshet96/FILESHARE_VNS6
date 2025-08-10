@@ -1,5 +1,11 @@
 const Item = require('../models/Item');
 const User = require('../models/User');
+const Share = require('../models/Share');
+// ✅ FIX: Add the missing import for nanoid
+const { customAlphabet } = require('nanoid');
+
+// ✅ FIX: Define the generateCode function
+const generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
 
 const GUEST_USER_EMAIL = 'guest@vshare.com';
 
@@ -39,7 +45,7 @@ exports.uploadGuestFiles = async (req, res) => {
             fileName: file.filename,
             path: file.path,
             size: file.size,
-            expiresAt: expirationDate, // Set the expiration date for auto-deletion
+            expiresAt: expirationDate,
         }));
 
         const insertedFiles = await Item.insertMany(fileItems);
