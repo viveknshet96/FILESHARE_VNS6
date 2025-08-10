@@ -33,6 +33,9 @@ const LoginPage = () => {
                 <input type="password" name="password" value={password} onChange={onChange} placeholder="Password" required />
                 <button type="submit" className="btn">Login</button>
                 <p>Don't have an account? <Link to="/register">Register</Link></p>
+                <p className="guest-link">
+                    Or, <Link to="/guest"><button>Send Files as a Guest</button>Send Files as a Guest</Link>
+                </p>
             </form>
         </div>
     );

@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const os = require('os');
 
-// ✅ All routes are imported together at the top
+// ✅ FIX: Uncomment these lines to import your route files
 const itemRoutes = require('./routes/items');
 const authRoutes = require('./routes/auth');
 const guestRoutes = require('./routes/guest');
@@ -15,12 +15,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ All middleware is grouped together
+// All middleware is grouped together
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ All API routes are grouped together
+// All API routes are grouped together
 app.use('/api/items', itemRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/guest', guestRoutes);
