@@ -31,20 +31,14 @@ const ItemSchema = new mongoose.Schema({
         required: true,
     },
     
-    // --- Fields specific to sharing ---
-    shareCode: { // A unique code for sharing this item (can be a file or folder)
-        type: String,
-        unique: true,
-        sparse: true, // Allows multiple null values, but unique if a value exists
-    },
-    
     createdAt: {
         type: Date,
         default: Date.now,
     },
-    shareExpiresAt: { // Set an expiration date when a share code is created
+    expiresAt: {
         type: Date,
-    }
+        index: { expires: 0 } 
+    },
 });
 
 // Ensures that items within the same folder have unique names

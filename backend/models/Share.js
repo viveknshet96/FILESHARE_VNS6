@@ -13,7 +13,7 @@ const ShareSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        // This tells MongoDB to automatically delete the share link after 24 hours
+        // Automatically delete this share document after 24 hours
         index: { expires: '24h' } 
     }
 });
