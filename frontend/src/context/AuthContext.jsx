@@ -60,34 +60,33 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-    const login = async (formData) => {
+     // ✅ THIS IS THE DEFINITIVE FIX
+    const login = async (formData, navigate) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser();
+            await loadUser(); // 1. Load user data
             toast.success('Login successful!');
-            return true; // Returns true on success
+            navigate('/'); // 2. Force the redirect to the main page
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
             dispatch({ type: 'AUTH_ERROR' });
-            return false; // Returns false on failure
         }
     };
 
-    const register = async (formData) => {
+    const register = async (formData, navigate) => {
         try {
             await axios.post('/api/auth/register', formData);
             toast.success('Registration successful! Please log in.');
-            return true;
+            navigate('/login'); // Redirect to login after successful registration
         } catch (err) {
             const errorMsg = err.response?.data?.errors ? err.response.data.errors[0].msg : err.response.data.msg;
             toast.error(errorMsg || 'Registration failed.');
-            return false;
         }
     };
 
-    return (
+     return (
         <AuthContext.Provider value={{ state, login, register, dispatch }}>
             {children}
         </AuthContext.Provider>

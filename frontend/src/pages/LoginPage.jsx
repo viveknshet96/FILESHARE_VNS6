@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
-import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -12,11 +11,8 @@ const LoginPage = () => {
 
     const onSubmit = async e => {
         e.preventDefault();
-        const success = await login(formData);
-        if (success) {
-            // ✅ FIX: Navigate to the new main page path
-            navigate('/');
-        }
+        // ✅ We now pass the 'navigate' function directly to the login logic
+        await login(formData, navigate);
     };
 
     return (

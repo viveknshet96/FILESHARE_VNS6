@@ -34,10 +34,13 @@ function App() {
                     <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
                 </nav>
             )}
-            <main>
+           <main>
                 <Routes>
-                    <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
-                    <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
+                    {/* ✅ FIX: Simplified login route. The redirect is now handled inside the login function. */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    
+                    {/* ... Rest of your routes ... */}
                     <Route path="/guest" element={<GuestPage />} />
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
                     <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
