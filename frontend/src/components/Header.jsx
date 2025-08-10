@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
-// ✅ FIX: Import the logo from the correct relative path inside the 'src' folder
 import logo from '../assets/file-sharing.png';
 
 const Header = () => {
@@ -16,7 +15,8 @@ const Header = () => {
 
     return (
         <header className="header">
-            <Link to="/login/main" className="logo-link">                {/* ✅ FIX: Use the imported 'logo' variable in the src attribute */}
+            {/* ✅ FIX: The logo now links to the main page if logged in, or the login page if not. */}
+            <Link to={isAuthenticated ? "/" : "/login"} className="logo-link">
                 <img src={logo} alt="V Share Logo" className="logo-image" />
                 <span className="logo-text">V Share</span>
             </Link>
