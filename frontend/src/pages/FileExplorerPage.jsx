@@ -126,8 +126,7 @@ const FileExplorerPage = () => {
     };
 
   return (
-    <div>
-            {/* THIS TOOLBAR CONTAINS THE BREADCRUMBS AND ACTION BUTTONS */}
+        <div>
             <div className="toolbar">
                 <div className="breadcrumbs">
                     {history.map((folder, index) => (
@@ -140,20 +139,25 @@ const FileExplorerPage = () => {
                     ))}
                 </div>
                 <div className="toolbar-actions">
-                    <button 
-                        className="btn btn-success" 
-                        onClick={handleCreateShareFromSelection}
-                        disabled={selectedItems.length === 0}
-                    >
-                        Share ({selectedItems.length})
-                    </button>
+                    {/* The Share button is REMOVED from here */}
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
-      </div>
+            </div>
+            
+            <FileUpload onUpload={handleUpload} disabled={isLoading} />
 
-      <FileUpload onUpload={handleUpload} disabled={isLoading} />
+            {/* ✅ FIX: The Share button is MOVED to a new container here */}
+            <div className="share-button-container">
+                <button 
+                    className="btn btn-success" 
+                    onClick={handleCreateShareFromSelection}
+                    disabled={selectedItems.length === 0}
+                >
+                    Share ({selectedItems.length}) Selected
+                </button>
+            </div>
 
-      {isLoading ? <Loader /> : 
+            {isLoading ? <Loader /> : 
                 <ItemList 
                     items={items} 
                     onFolderClick={handleFolderClick} 
@@ -161,17 +165,16 @@ const FileExplorerPage = () => {
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
                 />
-      }
+            }
 
-      {/* NEW: Render the modal when its state is open */}
-      {shareInfo.isOpen && (
-        <ShareModal
-          code={shareInfo.code}
-          onClose={() => setShareInfo({ isOpen: false, code: null })}
-        />
-      )}
-    </div>
-  );
+            {shareInfo.isOpen && (
+                <ShareModal 
+                    code={shareInfo.code}
+                    onClose={() => setShareInfo({ isOpen: false, code: null })}
+                />
+            )}
+        </div>
+    );
 };
 
 export default FileExplorerPage;

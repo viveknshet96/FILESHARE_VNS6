@@ -439,3 +439,8 @@
 .auth-links a:hover {
     text-decoration: underline;
 }
+/* Add this to your App.css */
+.share-button-container {
+    text-align: center;
+    margin: 1.5rem 0;
+}
