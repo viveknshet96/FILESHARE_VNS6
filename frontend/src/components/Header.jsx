@@ -1,36 +1,40 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import logo from '../../public/logo.png'; // Import your logo image
+import { AuthContext } from '../context/AuthContext.jsx';
+// ✅ FIX: Import the logo from the correct relative path inside the 'src' folder
+import logo from '../assets/logo.png';
 
 const Header = () => {
     const { state, dispatch } = useContext(AuthContext);
+    const { isAuthenticated, user } = state;
     const navigate = useNavigate();
 
-    const handleLogout = () => {
+    const onLogout = () => {
         dispatch({ type: 'LOGOUT' });
         navigate('/login');
     };
 
     return (
         <header className="header">
-            <Link to="/" className="logo">
-                <img src={logo} alt="V Share Logo" style={{ height: '30px', marginRight: '10px', verticalAlign: 'middle' }} />
-                V Share
+            <Link to="/" className="logo-link">
+                {/* ✅ FIX: Use the imported 'logo' variable in the src attribute */}
+                <img src={logo} alt="V Share Logo" className="logo-image" />
+                <span className="logo-text">V Share</span>
             </Link>
-            <nav>
-                {state.isAuthenticated ? (
+            
+            <div className="header-user-info">
+                {isAuthenticated && user ? (
                     <>
-                        <span className="welcome-message">Welcome, {state.user?.name}</span>
-                        <button onClick={handleLogout} className="logout-btn">Logout</button>
+                        <span>Welcome, {user.name}</span>
+                        <button onClick={onLogout} className="btn btn-secondary">Logout</button>
                     </>
                 ) : (
-                    <>
+                    <div className="auth-links">
                         <Link to="/login">Login</Link>
                         <Link to="/register">Register</Link>
-                    </>
+                    </div>
                 )}
-            </nav>
+            </div>
         </header>
     );
 };
