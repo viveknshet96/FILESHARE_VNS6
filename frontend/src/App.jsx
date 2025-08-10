@@ -36,9 +36,7 @@ function App() {
             )}
             <main>
                 <Routes>
-                    {/* ✅ THIS LINE IS THE FIX: When 'isAuthenticated' becomes true after a successful login, this route will automatically navigate to the main page. */}
                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
-                    
                     <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
                     <Route path="/guest" element={<GuestPage />} />
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />

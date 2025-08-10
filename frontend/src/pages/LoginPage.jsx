@@ -6,19 +6,15 @@ import { toast } from 'react-hot-toast';
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const { login } = useContext(AuthContext);
-    const navigate = useNavigate(); // Re-introduce the navigate hook
+    const navigate = useNavigate();
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async e => {
         e.preventDefault();
-        
-        // Call the login function from the context
         const success = await login(formData);
-        
-        // ✅ FIX: Only navigate if the login function explicitly returns 'true'
         if (success) {
-            navigate('/');
+            navigate('/'); // Redirects to the main page
         }
     };
 
