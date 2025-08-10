@@ -9,11 +9,22 @@ import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import GuestPage from './pages/GuestPage';
+import Loader from './components/Loader'; // Make sure Loader is imported
 import './App.css';
 
 function App() {
     const { state } = useContext(AuthContext);
-    const { isAuthenticated } = state;
+    // ✅ FIX: Destructure the 'loading' state as well
+    const { isAuthenticated, loading } = state;
+
+    // ✅ FIX: If the app is still checking the user's status, show a loader
+    if (loading) {
+        return (
+            <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <Loader />
+            </div>
+        );
+    }
 
     return (
         <div className="container">
