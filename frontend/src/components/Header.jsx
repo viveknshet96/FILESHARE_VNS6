@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
 // ✅ FIX: Import the logo from the correct relative path inside the 'src' folder
-import logo from '../assets/logo.png';
+import logo from '../assets/transfer.gif';
 
 const Header = () => {
     const { state, dispatch } = useContext(AuthContext);
