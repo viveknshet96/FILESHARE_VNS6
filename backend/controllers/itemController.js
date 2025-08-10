@@ -1,4 +1,5 @@
 const Item = require('../models/Item');
+const Share = require('../models/Share');
 const fs = require('fs');
 const path = require('path');
 const { customAlphabet } = require('nanoid');
@@ -62,51 +63,36 @@ exports.uploadFiles = async (req, res) => {
 };
 
 // Generate a share code for an item (file or folder)
-// Replace the old createShareLink function with this one
-
 exports.createShareLink = async (req, res) => {
-    // Expect an array of item IDs from the request body
     const { itemIds } = req.body;
-
     if (!itemIds || itemIds.length === 0) {
         return res.status(400).json({ msg: 'No items selected for sharing.' });
     }
-
     try {
-        const code = generateCode();
-        const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expires in 24 hours
-
-        // Update all selected items to have the same share code and expiration date
-        await Item.updateMany(
-            { _id: { $in: itemIds } },
-            { $set: { shareCode: code, shareExpiresAt: expiration } }
-        );
-
-        res.json({ code: code });
+        const newShare = new Share({
+            code: generateCode(),
+            items: itemIds,
+        });
+        await newShare.save();
+        res.json({ code: newShare.code });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
-
-// Get shared item(s) by code
+// UPDATED: Gets shared items by finding the Share object first
 exports.getSharedItems = async (req, res) => {
     try {
-        const item = await Item.findOne({
-            shareCode: req.params.code.toUpperCase(),
-            shareExpiresAt: { $gt: new Date() } // Check if not expired
-        });
+        // Find the share link and populate the 'items' field to get all the item data
+        const share = await Share.findOne({ code: req.params.code.toUpperCase() })
+            .populate('items');
 
-        if (!item) return res.status(404).json({ msg: 'Link is invalid or has expired.' });
-
-        if (item.type === 'file') {
-            return res.json([item]); // Return as an array for consistency
+        if (!share) {
+            return res.status(404).json({ msg: 'Link is invalid or has expired.' });
         }
-        
-        // If it's a folder, get its contents
-        const folderContents = await Item.find({ parentId: item._id }).sort({ type: -1, name: 1 });
-        res.json(folderContents);
+        res.json(share.items); // Return the array of items
     } catch (err) {
+        console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
