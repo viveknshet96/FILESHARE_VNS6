@@ -1,46 +1,53 @@
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
-    name: {
+    name: { // The display name, e.g., "My Report.pdf" or "Vacation Photos"
         type: String,
         required: true,
     },
-    type: {
+    type: { // Differentiates between files and folders
         type: String,
         enum: ['file', 'folder'],
         required: true,
     },
-    parentId: {
+    parentId: { // The ID of the parent folder. `null` means it's in the root directory.
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Item',
         default: null,
     },
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    fileName: {
+    
+    // --- Fields specific to files ---
+    fileName: { // The unique name stored on the server's disk
         type: String,
     },
-    path: {
+    path: { // The server path to the file
         type: String,
     },
     size: {
         type: Number,
+    },owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
+    
+    // --- Fields specific to sharing ---
+    shareCode: { // A unique code for sharing this item (can be a file or folder)
+        type: String,
+        unique: true,
+        sparse: true, // Allows multiple null values, but unique if a value exists
+    },
+    
     createdAt: {
         type: Date,
         default: Date.now,
     },
-    expiresAt: {
+    shareExpiresAt: { // Set an expiration date when a share code is created
         type: Date,
-        index: { expires: 0 } 
-    },
+    }
 });
 
-// ✅ FIX: The unique index now includes the 'owner', allowing different users
-// to have items with the same name in the same folder structure.
-ItemSchema.index({ parentId: 1, name: 1, owner: 1 }, { unique: true });
+// Ensures that items within the same folder have unique names
+ItemSchema.index({ parentId: 1, name: 1 }, { unique: true });
 
 module.exports = mongoose.models.Item || mongoose.model('Item', ItemSchema);

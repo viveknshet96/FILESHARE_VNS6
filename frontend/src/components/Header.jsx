@@ -1,39 +1,26 @@
+
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext.jsx';
-import logo from '../assets/file-sharing.png';
+import { AuthContext } from '../context/AuthContext';
 
 const Header = () => {
     const { state, dispatch } = useContext(AuthContext);
     const { isAuthenticated, user } = state;
-    const navigate = useNavigate();
 
     const onLogout = () => {
         dispatch({ type: 'LOGOUT' });
-        navigate('/login');
     };
 
     return (
         <header className="header">
-            {/* ✅ FIX: The logo now links to the main page if logged in, or the login page if not. */}
-            <Link to={isAuthenticated ? "/" : "/login"} className="logo-link">
-                <img src={logo} alt="V Share Logo" className="logo-image" />
-                <span className="logo-text">V Share</span>
-            </Link>
-            
-            <div className="header-user-info">
-                {isAuthenticated && user ? (
-                    <>
-                        <span>Welcome, {user.name}</span>
-                        <button onClick={onLogout} className="btn btn-secondary">Logout</button>
-                    </>
-                ) : (
-                    <div className="auth-links">
-                        <Link to="/login">Login</Link>
-                        <Link to="/register">Register</Link>
-                    </div>
-                )}
-            </div>
+            <h1 className="header__title">
+                Quick<span>Share</span>
+            </h1>
+            {isAuthenticated && user && (
+                <div className="header-user-info">
+                    <span>Welcome, {user.name}</span>
+                    <button onClick={onLogout} className="btn btn-secondary">Logout</button>
+                </div>
+            )}
         </header>
     );
 };

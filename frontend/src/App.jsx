@@ -8,21 +8,11 @@ import FileExplorerPage from './pages/FileExplorerPage';
 import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import GuestPage from './pages/GuestPage';
-import Loader from './components/Loader';
 import './App.css';
 
 function App() {
     const { state } = useContext(AuthContext);
-    const { isAuthenticated, loading } = state;
-
-    if (loading) {
-        return (
-            <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Loader />
-            </div>
-        );
-    }
+    const { isAuthenticated } = state;
 
     return (
         <div className="container">
@@ -34,14 +24,10 @@ function App() {
                     <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
                 </nav>
             )}
-           <main>
+            <main>
                 <Routes>
-                    {/* ✅ FIX: Simplified login route. The redirect is now handled inside the login function. */}
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    
-                    {/* ... Rest of your routes ... */}
-                    <Route path="/guest" element={<GuestPage />} />
+                    <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
+                    <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
                     <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
                     <Route path="/receive/:shareCode" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
