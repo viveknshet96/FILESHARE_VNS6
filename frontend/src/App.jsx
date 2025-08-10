@@ -8,20 +8,11 @@ import FileExplorerPage from './pages/FileExplorerPage';
 import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import Loader from './components/Loader';
 import './App.css';
 
 function App() {
     const { state } = useContext(AuthContext);
-    const { isAuthenticated, loading } = state;
-
-    if (loading) {
-        return (
-            <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Loader />
-            </div>
-        );
-    }
+    const { isAuthenticated } = state;
 
     return (
         <div className="container">
@@ -35,9 +26,7 @@ function App() {
             )}
             <main>
                 <Routes>
-                    {/* ✅ THIS LINE IS THE FIX: When 'isAuthenticated' becomes true, this route will automatically navigate to the main page. */}
                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
-                    
                     <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
                     <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />

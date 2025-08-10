@@ -1,27 +1,36 @@
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext.jsx';
+import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { loginUser } from '../api';
+import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
-    // We no longer need 'useNavigate' here
-    const { login } = useContext(AuthContext);
+    const { dispatch } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const { email, password } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async e => {
         e.preventDefault();
-        // The only job of this function is to call login.
-        // The redirection will be handled automatically by App.jsx.
-        await login(formData);
+        try {
+            const res = await loginUser({ email, password });
+            dispatch({ type: 'LOGIN_SUCCESS', payload: res.data });
+            toast.success('Login successful!');
+            navigate('/');
+        } catch (err) {
+            toast.error(err.response.data.msg || 'Login failed');
+        }
     };
 
     return (
         <div className="auth-container">
             <form className="auth-form" onSubmit={onSubmit}>
-                <h2>Welcome Back!</h2>
-                <input type="email" name="email" value={formData.email} onChange={onChange} placeholder="Email" required />
-                <input type="password" name="password" value={formData.password} onChange={onChange} placeholder="Password" required />
+                <h2>Login</h2>
+                <input type="email" name="email" value={email} onChange={onChange} placeholder="Email" required />
+                <input type="password" name="password" value={password} onChange={onChange} placeholder="Password" required />
                 <button type="submit" className="btn">Login</button>
                 <p>Don't have an account? <Link to="/register">Register</Link></p>
             </form>
