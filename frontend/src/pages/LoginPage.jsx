@@ -8,7 +8,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation(); // Hook to access route state
 
-    // ✅ FIX: Check for passed state when the component loads
+    // ✅ This hook checks for passed credentials when the page loads
     useEffect(() => {
         if (location.state?.email && location.state?.password) {
             setFormData({

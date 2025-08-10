@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
-import { toast } from 'react-hot-toast';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -14,7 +13,7 @@ const RegisterPage = () => {
         e.preventDefault();
         const success = await register(formData);
         if (success) {
-            // ✅ FIX: Pass the form data to the login page
+            // ✅ On success, navigate to the login page and pass the credentials in the state
             navigate('/login', { 
                 state: { 
                     email: formData.email, 
