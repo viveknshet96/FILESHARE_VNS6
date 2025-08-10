@@ -41,7 +41,7 @@ const FileUpload = ({ onUpload, disabled }) => {
     
     return (
         <div 
-            className={`file-upload ${dragging ? 'file-upload--active' : ''} ${disabled ? 'disabled' : ''}`}
+            className={`file-upload ${dragging ? 'file-upload--active' : ''}`}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
@@ -50,16 +50,21 @@ const FileUpload = ({ onUpload, disabled }) => {
             <input 
                 type="file" 
                 id="fileInput"
-                multiple // Allow multiple files
+                multiple
                 onChange={handleFileChange}
                 style={{ display: 'none' }} 
                 disabled={disabled}
             />
-            <p>Drag & Drop files here, or</p>
-            <label htmlFor="fileInput" className={`btn ${disabled ? 'btn-disabled' : ''}`}>
-                Browse Files
-            </label>
-            {disabled && <p className="upload-indicator">Uploading, please wait...</p>}
+            
+            {/* ✅ NEW: Improved layout with icon and clearer text */}
+            <div className="file-upload-content">
+                <p className="file-upload-main-text">Drag & Drop files here</p>
+                <p className="file-upload-sub-text">or</p>
+                <label htmlFor="fileInput" className="btn">
+                    Browse Files
+                </label>
+                {disabled && <p className="upload-indicator">Uploading...</p>}
+            </div>
         </div>
     );
 };
