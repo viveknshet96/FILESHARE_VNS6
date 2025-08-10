@@ -30,18 +30,26 @@ function App() {
             <Header />
             {isAuthenticated && (
                 <nav className="main-nav">
-                    <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>My Files</NavLink>
+                    {/* ✅ FIX: NavLink now points to the new main page path */}
+                    <NavLink to="/login/main" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>My Files</NavLink>
                     <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
                 </nav>
             )}
             <main>
                 <Routes>
-                    <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
-                    <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
+                    {/* ✅ FIX: Redirect authenticated users to the new main page path */}
+                    <Route path="/login" element={isAuthenticated ? <Navigate to="/login/main" /> : <LoginPage />} />
+                    <Route path="/register" element={isAuthenticated ? <Navigate to="/login/main" /> : <RegisterPage />} />
                     <Route path="/guest" element={<GuestPage />} />
-                    <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
+                    
+                    {/* ✅ FIX: The main page route is now at /login/main */}
+                    <Route path="/login/main" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
+                    
                     <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
                     <Route path="/receive/:shareCode" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
+                    
+                    {/* Optional: Redirect the root path to the new main page if logged in */}
+                    <Route path="/" element={<Navigate to={isAuthenticated ? "/login/main" : "/login"} />} />
                 </Routes>
             </main>
         </div>

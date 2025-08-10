@@ -16,8 +16,7 @@ const Header = () => {
 
     return (
         <header className="header">
-            <Link to="/" className="logo-link">
-                {/* ✅ FIX: Use the imported 'logo' variable in the src attribute */}
+            <Link to="/login/main" className="logo-link">                {/* ✅ FIX: Use the imported 'logo' variable in the src attribute */}
                 <img src={logo} alt="V Share Logo" className="logo-image" />
                 <span className="logo-text">V Share</span>
             </Link>

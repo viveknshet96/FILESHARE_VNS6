@@ -14,7 +14,8 @@ const LoginPage = () => {
         e.preventDefault();
         const success = await login(formData);
         if (success) {
-            navigate('/'); // Redirects to the main page
+            // ✅ FIX: Navigate to the new main page path
+            navigate('/login/main');
         }
     };
 
