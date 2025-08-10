@@ -123,6 +123,9 @@
     background-color: var(--secondary-color);
     border-color: var(--accent-color);
 }
+.file-upload label.btn {
+    margin-top: 10px;
+}
 .share-button-container {
     text-align: center;
     margin: 1.5rem 0;
@@ -191,20 +194,20 @@
 .btn-secondary {
     background-color: #5a6268;
 }
-
-/* ===== Modal & Loader ===== */
+/* ===== Share Modal ===== */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
+
 .modal-content {
     background-color: var(--primary-color);
     padding: 2rem;
@@ -213,7 +216,9 @@
     position: relative;
     max-width: 90%;
     width: 450px;
+    border: 1px solid var(--border-color);
 }
+
 .modal-close-btn {
     position: absolute;
     top: 10px;
@@ -224,6 +229,17 @@
     font-size: 1.5rem;
     cursor: pointer;
 }
+
+.modal-content h2 {
+    margin-bottom: 1rem;
+}
+
+.modal-content p {
+    margin-top: 1rem;
+    color: var(--text-muted-color);
+    font-size: 0.9rem;
+}
+
 .share-code-display, .share-link-display {
     background: var(--secondary-color);
     border: 1px solid var(--border-color);
@@ -235,39 +251,46 @@
     position: relative;
     word-break: break-all;
 }
+
 .share-code-display {
     font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: 0.5rem;
+    color: var(--accent-color);
 }
+
+.share-link-display {
+    font-size: 0.9rem;
+    color: var(--text-muted-color);
+}
+
+.share-code-display:hover, .share-link-display:hover {
+    background-color: #333;
+}
+
+.share-code-display span, .share-link-display span {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: var(--text-muted-color);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.share-code-display:hover span, .share-link-display:hover span {
+    opacity: 1;
+}
+
+.share-qr-display {
+    margin-top: 1.5rem;
+}
+
 .share-qr-display img {
     background: white;
     padding: 10px;
     border-radius: 5px;
     max-width: 100%;
-}
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-}
-.loader {
-    border: 5px solid var(--secondary-color);
-    border-top: 5px solid var(--accent-color);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-.error-text {
-    color: var(--error-color);
-    text-align: center;
-    margin-top: 1rem;
 }
 
 /* ===== Responsive Design ===== */
