@@ -1,7 +1,7 @@
 import React, { createContext, useReducer, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-hot-toast';
 
+// This helper function sets the token on all future axios requests
 const setAuthToken = (token) => {
     if (token) {
         axios.defaults.headers.common['x-auth-token'] = token;
@@ -10,9 +10,12 @@ const setAuthToken = (token) => {
     }
 };
 
+// The reducer manages state changes
 const authReducer = (state, action) => {
     switch (action.type) {
-        case 'AUTH_SUCCESS':
+        case 'LOGIN_SUCCESS':
+        case 'REGISTER_SUCCESS':
+            // ✅ This line is CRITICAL. It sets the token for all future requests.
             setAuthToken(action.payload.token);
             localStorage.setItem('token', action.payload.token);
             return { ...state, isAuthenticated: true, token: action.payload.token, loading: false };
@@ -20,6 +23,7 @@ const authReducer = (state, action) => {
             return { ...state, isAuthenticated: true, user: action.payload, loading: false };
         case 'AUTH_ERROR':
         case 'LOGOUT':
+            // ✅ This line is CRITICAL. It clears the token on logout.
             setAuthToken(null);
             localStorage.removeItem('token');
             return { ...state, token: null, isAuthenticated: false, user: null, loading: false };
@@ -27,8 +31,6 @@ const authReducer = (state, action) => {
             return state;
     }
 };
-
-
 
 export const AuthContext = createContext();
 
@@ -55,41 +57,13 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'AUTH_ERROR' });
         }
     };
+
     useEffect(() => {
         loadUser();
     }, []);
 
-
-    const login = async (formData) => {
-        try {
-            const res = await axios.post('/api/auth/login', formData);
-            dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser();
-            toast.success('Login successful!');
-            return true;
-        } catch (err) {
-            dispatch({ type: 'AUTH_ERROR' });
-            toast.error(err.response?.data?.msg || 'Login failed.');
-            return false;
-        }
-    };
-    
-    const register = async (formData) => {
-        try {
-            await axios.post('/api/auth/register', formData);
-            toast.success('Registration successful! Please log in.');
-            return true;
-        } catch (err) {
-            const errorMsg = err.response?.data?.errors 
-                ? err.response.data.errors[0].msg 
-                : err.response?.data?.msg;
-            toast.error(errorMsg || 'Registration failed.');
-            return false;
-        }
-    };
-
     return (
-        <AuthContext.Provider value={{ state, login, register, dispatch }}>
+        <AuthContext.Provider value={{ state, dispatch }}>
             {children}
         </AuthContext.Provider>
     );
