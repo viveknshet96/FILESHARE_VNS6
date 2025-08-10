@@ -46,3 +46,8 @@ export const getDownloadUrl = (fileName) => {
     // The download URL still needs the full base URL, as it's an <a> tag href
     return `${import.meta.env.VITE_API_URL}/uploads/${fileName}`;
 };
+
+export const createGuestShareLink = (itemIds) => {
+    // Calls the new, public guest share endpoint
+    return axios.post('/api/guest/share', { itemIds });
+};

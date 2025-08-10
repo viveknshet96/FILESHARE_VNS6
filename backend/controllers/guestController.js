@@ -48,3 +48,34 @@ exports.uploadGuestFiles = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+// Creates a share link for items belonging to the Guest user
+exports.createGuestShareLink = async (req, res) => {
+    const { itemIds } = req.body;
+    if (!itemIds || itemIds.length === 0) {
+        return res.status(400).json({ msg: 'No items selected for sharing.' });
+    }
+
+    try {
+        const ownerId = await getGuestUserId();
+        if (!ownerId) {
+            return res.status(500).send('Server configuration error.');
+        }
+
+        // Security Check: Verify all items belong to the Guest user
+        const items = await Item.find({ _id: { $in: itemIds }, owner: ownerId });
+        if (items.length !== itemIds.length) {
+            return res.status(403).json({ msg: 'Forbidden: Attempted to share unauthorized files.' });
+        }
+
+        const newShare = new Share({
+            code: generateCode(),
+            items: itemIds,
+        });
+        await newShare.save();
+        res.json({ code: newShare.code });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};

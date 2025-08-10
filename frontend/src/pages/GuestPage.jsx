@@ -6,6 +6,8 @@ import ShareModal from '../components/ShareModal';
 import Loader from '../components/Loader';
 import ItemList from '../components/ItemList';
 import { createShareLink } from '../api';
+import { createGuestShareLink } from '../api';
+
 
 // A separate upload function for the public guest route
 const uploadGuestFiles = (files, onUploadProgress) => {
@@ -48,12 +50,14 @@ const GuestPage = () => {
         });
     };
 
+    
     const handleCreateShareFromSelection = async () => {
         if (selectedItems.length === 0) {
             return toast.error('Please select at least one file to share.');
         }
         try {
-            const shareResponse = await createShareLink(selectedItems);
+            // ✅ FIX: Use the new public guest share function
+            const shareResponse = await createGuestShareLink(selectedItems);
             setShareInfo({ isOpen: true, code: shareResponse.data.code });
             setUploadedItems([]);
             setSelectedItems([]);
