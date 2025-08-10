@@ -60,11 +60,11 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-     const login = async (formData, navigate) => {
+    const login = async (formData, navigate) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser();
+            await loadUser(); // Immediately load user data
             toast.success('Login successful!');
             navigate('/');
         } catch (err) {
@@ -80,10 +80,7 @@ export const AuthProvider = ({ children }) => {
             toast.success('Registration successful! Please log in.');
             navigate('/login');
         } catch (err) {
-            // ✅ This handles the 400 error and prevents the crash
-            const errorMsg = err.response?.data?.errors 
-                ? err.response.data.errors[0].msg 
-                : err.response?.data?.msg;
+            const errorMsg = err.response?.data?.errors ? err.response.data.errors[0].msg : err.response.data.msg;
             toast.error(errorMsg || 'Registration failed.');
         }
     };
