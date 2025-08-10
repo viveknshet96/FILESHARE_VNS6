@@ -60,18 +60,22 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
+    // ✅ FIX: The login function now returns 'true' on success and 'false' on failure.
     const login = async (formData) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser(); // Immediately load user data
+            await loadUser();
             toast.success('Login successful!');
+            return true;
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
             dispatch({ type: 'AUTH_ERROR' });
+            return false;
         }
     };
+
 
     const register = async (formData) => {
         try {

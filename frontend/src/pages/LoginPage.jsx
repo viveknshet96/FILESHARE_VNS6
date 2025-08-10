@@ -1,18 +1,25 @@
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
+import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const { login } = useContext(AuthContext);
+    const navigate = useNavigate(); // Re-introduce the navigate hook
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async e => {
         e.preventDefault();
-        // The only job of this function is to call login.
-        // The redirection will be handled automatically by App.jsx.
-        await login(formData);
+        
+        // Call the login function from the context
+        const success = await login(formData);
+        
+        // ✅ FIX: Only navigate if the login function explicitly returns 'true'
+        if (success) {
+            navigate('/');
+        }
     };
 
     return (
@@ -23,8 +30,8 @@ const LoginPage = () => {
                 <input type="password" name="password" value={formData.password} onChange={onChange} placeholder="Password" required />
                 <button type="submit" className="btn">Login</button>
                 <p>Don't have an account? <Link to="/register">Register</Link></p>
-                 <p className="guest-link">
-                    Or, <Link to="/guest"><h1>Send Files as a Guest</h1></Link>
+                <p className="guest-link">
+                    Or, <Link to="/guest">Send Files as a Guest</Link>
                 </p>
             </form>
         </div>
@@ -32,11 +39,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-
-
-
-
- <p className="guest-link">
-                    Or, <Link to="/guest"><button>Send Files as a Guest</button>Send Files as a Guest</Link>
-                </p>
