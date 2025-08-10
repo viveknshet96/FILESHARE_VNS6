@@ -30,10 +30,8 @@ export const uploadFiles = (files, parentId = null, onUploadProgress) => {
     });
 };
 
-
-export const createShareLink = (itemId) => {
-    // Now sends a POST request to /api/items/share/:id
-    return axios.post(`/api/items/share/${itemId}`);
+export const createShareLink = (itemIds) => {
+    return axios.post('/api/items/share', { itemIds });
 };
 
 export const getSharedItems = (code) => {

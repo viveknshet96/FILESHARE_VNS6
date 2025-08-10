@@ -1,43 +1,36 @@
-// import React from 'react';
-
-// const Header = ({ onShowQR }) => {
-//     return (
-//         <header className="header">
-//             <h1 className="header__title">
-//                 Quick<span>Share</span>
-//             </h1>
-//             {/* <button className="btn" onClick={onShowQR}>
-//                 Share via QR Code
-//             </button> */}
-//              {/* The QR Code button is removed as it's now context-specific */}
-//         </header>
-//     );
-// };
-
-// export default Header;
-
 import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import logo from '../../public/logo.png'; // Import your logo image
 
 const Header = () => {
     const { state, dispatch } = useContext(AuthContext);
-    const { isAuthenticated, user } = state;
+    const navigate = useNavigate();
 
-    const onLogout = () => {
+    const handleLogout = () => {
         dispatch({ type: 'LOGOUT' });
+        navigate('/login');
     };
 
     return (
         <header className="header">
-            <h1 className="header__title">
-                V<h6>'</h6><span>Share</span>
-            </h1>
-            {isAuthenticated && user && (
-                <div className="header-user-info">
-                    <span>Welcome, {user.name}</span>
-                    <button onClick={onLogout} className="btn btn-secondary">Logout</button>
-                </div>
-            )}
+            <Link to="/" className="logo">
+                <img src={logo} alt="V Share Logo" style={{ height: '30px', marginRight: '10px', verticalAlign: 'middle' }} />
+                V Share
+            </Link>
+            <nav>
+                {state.isAuthenticated ? (
+                    <>
+                        <span className="welcome-message">Welcome, {state.user?.name}</span>
+                        <button onClick={handleLogout} className="logout-btn">Logout</button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login">Login</Link>
+                        <Link to="/register">Register</Link>
+                    </>
+                )}
+            </nav>
         </header>
     );
 };

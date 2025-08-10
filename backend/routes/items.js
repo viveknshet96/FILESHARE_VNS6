@@ -15,7 +15,7 @@ router.post('/folder', authMiddleware, itemController.createFolder);
 router.post('/upload', authMiddleware, upload, itemController.uploadFiles);
 
 // THIS IS THE CORRECT ROUTE FOR SHARING MULTIPLE ITEMS
-router.post('/share/:id', authMiddleware, itemController.createShareLink);
+router.post('/share', authMiddleware, itemController.createShareLink);
 
 // GET /api/items/share/:code
 router.get('/share/:code', itemController.getSharedItems);

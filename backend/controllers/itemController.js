@@ -63,23 +63,24 @@ exports.uploadFiles = async (req, res) => {
 
 // Generate a share code for an item (file or folder)
 // Replace the old createShareLink function with this one
-// Replace the existing createShareLink function with this one
 
 exports.createShareLink = async (req, res) => {
-    try {
-        // Get the single item ID from the URL parameter
-        const item = await Item.findById(req.params.id);
-        if (!item) {
-            return res.status(404).json({ msg: 'Item not found' });
-        }
+    // Expect an array of item IDs from the request body
+    const { itemIds } = req.body;
 
+    if (!itemIds || itemIds.length === 0) {
+        return res.status(400).json({ msg: 'No items selected for sharing.' });
+    }
+
+    try {
         const code = generateCode();
         const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expires in 24 hours
 
-        // Update just this one item with the new share code
-        item.shareCode = code;
-        item.shareExpiresAt = expiration;
-        await item.save();
+        // Update all selected items to have the same share code and expiration date
+        await Item.updateMany(
+            { _id: { $in: itemIds } },
+            { $set: { shareCode: code, shareExpiresAt: expiration } }
+        );
 
         res.json({ code: code });
     } catch (err) {
@@ -87,6 +88,7 @@ exports.createShareLink = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
 // Get shared item(s) by code
 exports.getSharedItems = async (req, res) => {
     try {
