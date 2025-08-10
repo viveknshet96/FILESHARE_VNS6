@@ -1,21 +1,18 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.jsx';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const { login } = useContext(AuthContext);
-    const navigate = useNavigate();
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async e => {
         e.preventDefault();
-        const success = await login(formData);
-        if (success) {
-            // On success, navigate to the main page
-            navigate('/');
-        }
+        // The only job of this function is to call login.
+        // The redirection will be handled automatically by App.jsx.
+        await login(formData);
     };
 
     return (
@@ -26,8 +23,8 @@ const LoginPage = () => {
                 <input type="password" name="password" value={formData.password} onChange={onChange} placeholder="Password" required />
                 <button type="submit" className="btn">Login</button>
                 <p>Don't have an account? <Link to="/register">Register</Link></p>
-                <p className="guest-link">
-                    Or, <Link to="/guest"><button>Send Files as a Guest</button>Send Files as a Guest</Link>
+                 <p className="guest-link">
+                    Or, <Link to="/guest"><h1>Send Files as a Guest</h1></Link>
                 </p>
             </form>
         </div>
@@ -35,3 +32,11 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+
+
+
+
+ <p className="guest-link">
+                    Or, <Link to="/guest"><button>Send Files as a Guest</button>Send Files as a Guest</Link>
+                </p>

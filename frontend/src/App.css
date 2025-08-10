@@ -456,3 +456,8 @@
     color: var(--text-muted-color);
     cursor: pointer;
 }
+/* Add this new rule to your App.css */
+.item:hover {
+    background-color: var(--secondary-color);
+    cursor: pointer;
+}

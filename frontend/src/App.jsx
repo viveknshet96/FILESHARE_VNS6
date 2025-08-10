@@ -9,16 +9,13 @@ import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import GuestPage from './pages/GuestPage';
-import Loader from './components/Loader'; // Import the Loader component
+import Loader from './components/Loader';
 import './App.css';
 
 function App() {
     const { state } = useContext(AuthContext);
-    // Destructure both isAuthenticated and the loading state
     const { isAuthenticated, loading } = state;
 
-    // ✅ FIX: If the app is still checking your login status,
-    // show a full-page loader and nothing else. This prevents any UI glitches.
     if (loading) {
         return (
             <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -39,12 +36,11 @@ function App() {
             )}
             <main>
                 <Routes>
-                    {/* Public Routes */}
+                    {/* ✅ THIS LINE IS THE FIX: When 'isAuthenticated' becomes true after a successful login, this route will automatically navigate to the main page. */}
                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
+                    
                     <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
                     <Route path="/guest" element={<GuestPage />} />
-
-                    {/* Private Routes */}
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
                     <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
                     <Route path="/receive/:shareCode" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />

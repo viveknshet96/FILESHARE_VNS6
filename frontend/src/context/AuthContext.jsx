@@ -60,23 +60,19 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-    // ✅ FIX: The LOGIN function was missing.
     const login = async (formData) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser(); // Immediately load user data after login
+            await loadUser(); // Immediately load user data
             toast.success('Login successful!');
-            return true;
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
             dispatch({ type: 'AUTH_ERROR' });
-            return false;
         }
     };
 
-    // ✅ FIX: The REGISTER function was missing.
     const register = async (formData) => {
         try {
             await axios.post('/api/auth/register', formData);
@@ -90,7 +86,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        // ✅ FIX: The new login and register functions are now provided to the whole app.
         <AuthContext.Provider value={{ state, login, register, dispatch }}>
             {children}
         </AuthContext.Provider>
