@@ -25,6 +25,8 @@ const getGuestUserId = async () => {
 getGuestUserId();
 
 // Logic for handling guest file uploads
+// Replace the existing uploadGuestFiles function in guestController.js with this one
+
 exports.uploadGuestFiles = async (req, res) => {
     const ownerId = await getGuestUserId();
     if (!ownerId) {
@@ -36,25 +38,42 @@ exports.uploadGuestFiles = async (req, res) => {
             return res.status(400).json({ msg: 'No files uploaded.' });
         }
         
-        const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expires in 24 hours
+        const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const newFileItems = [];
 
-        const fileItems = req.files.map(file => ({
-            name: file.originalname,
-            type: 'file',
-            owner: ownerId,
-            fileName: file.filename,
-            path: file.path,
-            size: file.size,
-            expiresAt: expirationDate,
-        }));
+        // ✅ FIX: Added intelligent renaming logic for guest uploads
+        for (const file of req.files) {
+            let newName = file.originalname;
+            let counter = 1;
+            const nameParts = newName.lastIndexOf('.') > -1 ? {
+                base: newName.substring(0, newName.lastIndexOf('.')),
+                ext: newName.substring(newName.lastIndexOf('.'))
+            } : { base: newName, ext: '' };
 
-        const insertedFiles = await Item.insertMany(fileItems);
+            // Check if a file with the same name already exists for the guest user
+            while (await Item.findOne({ name: newName, parentId: null, owner: ownerId })) {
+                newName = `${nameParts.base} (${counter})${nameParts.ext}`;
+                counter++;
+            }
+            
+            newFileItems.push({
+                name: newName,
+                type: 'file',
+                owner: ownerId,
+                fileName: file.filename,
+                path: file.path,
+                size: file.size,
+                expiresAt: expirationDate,
+            });
+        }
+
+        const insertedFiles = await Item.insertMany(newFileItems);
         res.status(201).json(insertedFiles);
     } catch (err) {
+        console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
-
 // Creates a share link for items belonging to the Guest user
 exports.createGuestShareLink = async (req, res) => {
     const { itemIds } = req.body;

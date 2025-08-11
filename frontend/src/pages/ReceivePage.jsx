@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react'; // 1. Import useContext
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { getSharedItems, deleteItem } from '../api'; // Use getSharedItems
-import ItemList from '../components/ItemList'; // Correctly import ItemList
+import { AuthContext } from '../context/AuthContext'; // 2. Import the AuthContext
+import { getSharedItems, deleteItem } from '../api';
+import ItemList from '../components/ItemList';
 import Loader from '../components/Loader';
 
 const ReceivePage = () => {
+    const { state } = useContext(AuthContext); // 3. Get the auth state from the context
+    const { isAuthenticated } = state;
+
     const [code, setCode] = useState('');
     const [files, setFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +24,6 @@ const ReceivePage = () => {
         setError('');
         setFiles([]);
         try {
-            // Use the new API function
             const response = await getSharedItems(fetchCode);
             setFiles(response.data);
             if(response.data.length === 0) {
@@ -41,12 +44,11 @@ const ReceivePage = () => {
         }
     }, [shareCode]);
 
-const handleDelete = async (itemId) => {
+    const handleDelete = async (itemId) => {
         if (!window.confirm('Are you sure you want to delete this file permanently?')) {
             return;
         }
         try {
-            // Use the new deleteItem function
             await deleteItem(itemId);
             setFiles(files.filter(file => file._id !== itemId));
             toast.success('Item deleted!');
@@ -55,14 +57,12 @@ const handleDelete = async (itemId) => {
         }
     };
 
-
     const handleSubmit = (e) => {
         e.preventDefault();
         navigate(`/receive/${code}`);
     };
 
     return (
-        // ... (no changes to the JSX part)
         <div className="receive-page">
             <form onSubmit={handleSubmit} className="receive-form">
                 <h2>Receive Files</h2>
@@ -81,7 +81,14 @@ const handleDelete = async (itemId) => {
             
             {isLoading && <Loader />}
             {error && <p className="error-text">{error}</p>}
-            {files.length > 0 && <ItemList items={files} onDelete={handleDelete} />}
+            
+            {/* ✅ FIX: Only pass the 'onDelete' function if the user is logged in. */}
+            {files.length > 0 && (
+                <ItemList 
+                    items={files} 
+                    onDelete={isAuthenticated ? handleDelete : null} 
+                />
+            )}
         </div>
     );
 };

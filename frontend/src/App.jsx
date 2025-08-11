@@ -9,15 +9,13 @@ import ReceivePage from './pages/ReceivePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import GuestPage from './pages/GuestPage';
-import Loader from './components/Loader'; // Make sure Loader is imported
+import Loader from './components/Loader';
 import './App.css';
 
 function App() {
     const { state } = useContext(AuthContext);
-    // ✅ FIX: Destructure the 'loading' state as well
     const { isAuthenticated, loading } = state;
 
-    // ✅ FIX: If the app is still checking the user's status, show a loader
     if (loading) {
         return (
             <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -30,20 +28,29 @@ function App() {
         <div className="container">
             <Toaster position="top-center" reverseOrder={false} />
             <Header />
-            {isAuthenticated && (
-                <nav className="main-nav">
+            
+            {/* ✅ FIX: The main navigation is now always visible */}
+            <nav className="main-nav">
+                {/* The "My Files" link only appears if the user is logged in */}
+                {isAuthenticated && (
                     <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>My Files</NavLink>
-                    <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
-                </nav>
-            )}
+                )}
+                <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
+            </nav>
+            
             <main>
                 <Routes>
-                    <Route path="/guest" element={<GuestPage />} />
+                    {/* Public Routes */}
                     <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
                     <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
+                    <Route path="/guest" element={<GuestPage />} />
+                    
+                    {/* ✅ FIX: The Receive routes are now public and no longer use PrivateRoute */}
+                    <Route path="/receive" element={<ReceivePage />} />
+                    <Route path="/receive/:shareCode" element={<ReceivePage />} />
+
+                    {/* Private Routes */}
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
-                    <Route path="/receive" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
-                    <Route path="/receive/:shareCode" element={<PrivateRoute><ReceivePage /></PrivateRoute>} />
                 </Routes>
             </main>
         </div>
