@@ -17,7 +17,12 @@ const authReducer = (state, action) => {
         case 'AUTH_SUCCESS':
             setAuthToken(action.payload.token);
             localStorage.setItem('token', action.payload.token);
-            return { ...state, isAuthenticated: true, token: action.payload.token, loading: false };
+            return { 
+                ...state, 
+                isAuthenticated: true, 
+                token: action.payload.token, 
+                loading: false 
+            };
         case 'USER_LOADED':
             return { ...state, isAuthenticated: true, user: action.payload, loading: false };
         case 'AUTH_ERROR':
@@ -25,6 +30,8 @@ const authReducer = (state, action) => {
             setAuthToken(null);
             localStorage.removeItem('token');
             return { ...state, token: null, isAuthenticated: false, user: null, loading: false };
+        case 'SET_LOADING':
+            return { ...state, loading: action.payload };
         default:
             return state;
     }
@@ -64,13 +71,27 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-   const login = async (formData, navigate) => {
+    const login = async (formData, navigate) => {
         try {
+            dispatch({ type: 'SET_LOADING', payload: true });
             const res = await axios.post('/api/auth/login', formData);
+            
+            // First, set the auth success state
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser(); // 1. Load user data
+            
+            // Then load user data
+            try {
+                const userRes = await axios.get('/api/auth');
+                dispatch({ type: 'USER_LOADED', payload: userRes.data });
+            } catch (userErr) {
+                console.error('Error loading user:', userErr);
+            }
+            
             toast.success('Login successful!');
-            navigate('/'); // 2. Force the redirect to the main page
+            
+            // Navigate after everything is set up
+            navigate('/');
+            
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
@@ -82,15 +103,28 @@ export const AuthProvider = ({ children }) => {
         try {
             await axios.post('/api/auth/register', formData);
             toast.success('Registration successful! Please log in.');
-            navigate('/login'); // Redirect to login after successful registration
+            navigate('/login');
         } catch (err) {
-            const errorMsg = err.response?.data?.errors ? err.response.data.errors[0].msg : err.response?.data?.msg;
+            const errorMsg = err.response?.data?.errors ? 
+                err.response.data.errors[0].msg : 
+                err.response?.data?.msg;
             toast.error(errorMsg || 'Registration failed.');
         }
     };
 
+    const logout = () => {
+        dispatch({ type: 'LOGOUT' });
+        toast.success('Logged out successfully');
+    };
+
     return (
-        <AuthContext.Provider value={{ state, login, register, dispatch }}>
+        <AuthContext.Provider value={{ 
+            state, 
+            login, 
+            register, 
+            logout,
+            dispatch 
+        }}>
             {children}
         </AuthContext.Provider>
     );
