@@ -51,3 +51,27 @@ export const createGuestShareLink = (itemIds) => {
     // Calls the new, public guest share endpoint
     return axios.post('/api/guest/share', { itemIds });
 };
+
+
+// Add these new functions to api/index.js
+
+export const getGuestItems = (parentId = null) => {
+    const url = parentId ? `/api/guest?parentId=${parentId}` : '/api/guest';
+    return axios.get(url);
+};
+
+export const createGuestFolder = (name, parentId = null) => {
+    return axios.post('/api/guest/folder', { name, parentId });
+};
+
+export const uploadGuestFiles = (files, parentId = null, onUploadProgress) => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    if (parentId) formData.append('parentId', parentId);
+    
+    // Calls the public guest upload route
+    return axios.post('/api/guest/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress,
+    });
+};

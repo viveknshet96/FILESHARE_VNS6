@@ -1,23 +1,13 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import FileUpload from '../components/FileUpload';
 import ShareModal from '../components/ShareModal';
 import Loader from '../components/Loader';
 import ItemList from '../components/ItemList';
-import { createShareLink } from '../api';
-import { createGuestShareLink } from '../api';
+// ✅ FIX: Import all necessary functions from the central api file
+import { createGuestShareLink, uploadGuestFiles } from '../api';
 
-
-// A separate upload function for the public guest route
-const uploadGuestFiles = (files, onUploadProgress) => {
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-    return axios.post('/api/guest/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress,
-    });
-};
+// The local uploadGuestFiles function is now removed from here
 
 const GuestPage = () => {
     const [shareInfo, setShareInfo] = useState({ isOpen: false, code: null });
@@ -29,6 +19,7 @@ const GuestPage = () => {
         if (!files || files.length === 0) return;
         setIsLoading(true);
         try {
+            // Use the imported uploadGuestFiles function
             const uploadResponse = await uploadGuestFiles(Array.from(files));
             setUploadedItems(uploadResponse.data);
             setSelectedItems(uploadResponse.data.map(item => item._id));
@@ -49,14 +40,13 @@ const GuestPage = () => {
             }
         });
     };
-
     
     const handleCreateShareFromSelection = async () => {
         if (selectedItems.length === 0) {
             return toast.error('Please select at least one file to share.');
         }
         try {
-            // ✅ FIX: Use the new public guest share function
+            // Use the public guest share function
             const shareResponse = await createGuestShareLink(selectedItems);
             setShareInfo({ isOpen: true, code: shareResponse.data.code });
             setUploadedItems([]);
@@ -76,7 +66,7 @@ const GuestPage = () => {
             <FileUpload onUpload={handleGuestUpload} disabled={isLoading} />
 
             <div className="share-button-container">
-                 <button 
+                <button 
                     className="btn btn-success" 
                     onClick={handleCreateShareFromSelection}
                     disabled={selectedItems.length === 0}
@@ -88,7 +78,7 @@ const GuestPage = () => {
             {isLoading && <Loader />}
 
             {uploadedItems.length > 0 && !isLoading && (
-                 <ItemList 
+                <ItemList 
                     items={uploadedItems}
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}

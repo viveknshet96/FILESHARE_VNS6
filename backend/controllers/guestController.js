@@ -24,6 +24,48 @@ const getGuestUserId = async () => {
 };
 getGuestUserId();
 
+
+// NEW: Get all items belonging to the Guest user in a specific folder
+exports.getGuestItems = async (req, res) => {
+    try {
+        const parentId = req.query.parentId || null;
+        const ownerId = await getGuestUserId();
+        if (!ownerId) {
+            return res.status(500).send('Server configuration error.');
+        }
+        const items = await Item.find({ parentId: parentId, owner: ownerId }).sort({ type: -1, name: 1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
+
+
+// NEW: Create a new folder as a Guest
+exports.createGuestFolder = async (req, res) => {
+    const { name, parentId } = req.body;
+    const ownerId = await getGuestUserId();
+    if (!ownerId) {
+        return res.status(500).send('Server configuration error.');
+    }
+    try {
+        const newFolder = new Item({
+            name,
+            type: 'folder',
+            parentId: parentId || null,
+            owner: ownerId,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Expires in 24 hours
+        });
+        await newFolder.save();
+        res.status(201).json(newFolder);
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ msg: 'A folder with this name already exists here.' });
+        }
+        res.status(500).send('Server Error');
+    }
+};
+
 // Logic for handling guest file uploads
 // Replace the existing uploadGuestFiles function in guestController.js with this one
 
@@ -104,3 +146,4 @@ exports.createGuestShareLink = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
