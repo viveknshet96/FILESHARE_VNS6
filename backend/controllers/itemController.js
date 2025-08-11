@@ -1,32 +1,24 @@
 const Item = require('../models/Item');
 const Share = require('../models/Share');
 const fs = require('fs');
-const path = require('path');
 const { customAlphabet } = require('nanoid');
 
 const generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
 
-// Get all items within a specific folder
 exports.getItems = async (req, res) => {
     try {
         const parentId = req.query.parentId || null;
-        const items = await Item.find({ parentId: parentId, owner: req.user.id }).sort({ type: -1, name: 1 });
+        const items = await Item.find({ parentId: parentId }).sort({ type: -1, name: 1 });
         res.json(items);
     } catch (err) {
         res.status(500).send('Server Error');
     }
 };
 
-// Create a new folder
 exports.createFolder = async (req, res) => {
     const { name, parentId } = req.body;
     try {
-        const newFolder = new Item({
-            name,
-            type: 'folder',
-            parentId: parentId || null,
-            owner: req.user.id,
-        });
+        const newFolder = new Item({ name, type: 'folder', parentId: parentId || null });
         await newFolder.save();
         res.status(201).json(newFolder);
     } catch (err) {
@@ -37,50 +29,27 @@ exports.createFolder = async (req, res) => {
     }
 };
 
-// Upload files into a specific folder
-// Replace the existing uploadFiles function in itemController.js with this one
-
 exports.uploadFiles = async (req, res) => {
     const { parentId } = req.body;
     try {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ msg: 'No files uploaded.' });
         }
-
-        const newFileItems = [];
-        for (const file of req.files) {
-            let newName = file.originalname;
-            let counter = 1;
-            const nameParts = newName.lastIndexOf('.') > -1 ? {
-                base: newName.substring(0, newName.lastIndexOf('.')),
-                ext: newName.substring(newName.lastIndexOf('.'))
-            } : { base: newName, ext: '' };
-
-            // Check if a file with the same name already exists in this folder for this user
-            while (await Item.findOne({ name: newName, parentId: parentId || null, owner: req.user.id })) {
-                // If it exists, append a number and check again
-                newName = `${nameParts.base} (${counter})${nameParts.ext}`;
-                counter++;
-            }
-            
-            newFileItems.push({
-                name: newName,
-                type: 'file',
-                parentId: parentId || null,
-                fileName: file.filename,
-                path: file.path,
-                size: file.size,
-                owner: req.user.id,
-            });
-        }
-
-        const insertedFiles = await Item.insertMany(newFileItems);
+        const fileItems = req.files.map(file => ({
+            name: file.originalname,
+            type: 'file',
+            parentId: parentId || null,
+            fileName: file.filename,
+            path: file.path,
+            size: file.size,
+        }));
+        const insertedFiles = await Item.insertMany(fileItems);
         res.status(201).json(insertedFiles);
     } catch (err) {
-        console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
+
 
 // UPDATED: Creates a single 'Share' document for multiple items
 exports.createShareLink = async (req, res) => {
