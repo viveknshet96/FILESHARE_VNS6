@@ -5,7 +5,7 @@ import logo from "../assets/logo.png";
 
 const Header = () => {
   const { state, dispatch } = useContext(AuthContext);
-  const { isAuthenticated, user } = state;
+  const { isAuthenticated, user, loading } = state;
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -15,55 +15,85 @@ const Header = () => {
   };
 
   const renderAuthLinks = () => {
-    // If on the login or register page, always show the public links
-    if (location.pathname === "/login" || location.pathname === "/register") {
+    // If on the login page, show register link and guest option
+    if (location.pathname === "/login") {
       return (
         <div className="auth-links">
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </div>
-      );
-    }
-    // If on the guest page, always show the guest info
-    if (location.pathname === "/guest") {
-      return (
-        <div className="header-user-info">
-          <span>Welcome, Guest</span>
-          <Link to="/login" className="btn btn-secondary">
-            Exit Guest Mode
+          <Link to="/register" className="auth-link">Register</Link>
+          <Link to="/guest" className="btn btn-secondary">
+            Continue as Guest
           </Link>
         </div>
       );
     }
-    // If the user is authenticated...
-    if (isAuthenticated) {
-      // ...and we have their data, show the welcome message and logout button.
-      if (user) {
-        return (
-          <div className="header-user-info">
-            <span>Welcome, {user.name}</span>
-            <button onClick={onLogout} className="btn btn-secondary">
-              Logout
-            </button>
+
+    // If on the register page, show login link and guest option
+    if (location.pathname === "/register") {
+      return (
+        <div className="auth-links">
+          <Link to="/login" className="auth-link">Login</Link>
+          <Link to="/guest" className="btn btn-secondary">
+            Continue as Guest
+          </Link>
+        </div>
+      );
+    }
+
+    // If on the guest page, show guest info and exit option
+    if (location.pathname === "/guest") {
+      return (
+        <div className="header-user-info">
+          <span className="welcome-text">Welcome, Guest User</span>
+          <div className="guest-actions">
+            <Link to="/login" className="btn btn-primary">
+              Login
+            </Link>
+            <Link to="/register" className="btn btn-secondary">
+              Register
+            </Link>
           </div>
-        );
-      }
-      // ✅ FIX: If authenticated but the user object is still loading, show nothing.
-      return null;
+        </div>
+      );
+    }
+
+    // If the user is authenticated, show user info and logout button
+    if (isAuthenticated) {
+      return (
+        <div className="header-user-info">
+          <span className="welcome-text">
+            Welcome, {user?.name || user?.email || 'User'}
+            {loading && <span className="loading-indicator"> (loading...)</span>}
+          </span>
+          <button onClick={onLogout} className="btn btn-logout">
+            Logout
+          </button>
+        </div>
+      );
     }
     
     // Fallback for any other case (user is not authenticated and not on a special page)
+    // This handles cases like 404 pages or other routes
     return (
       <div className="auth-links">
-        <Link to="/login">Login</Link>
-        <Link to="/register">Register</Link>
+        <Link to="/login" className="auth-link">Login</Link>
+        <Link to="/register" className="auth-link">Register</Link>
+        <Link to="/guest" className="btn btn-secondary">
+          Guest Mode
+        </Link>
       </div>
     );
   };
 
+  // Determine the logo link destination
+  const getLogoDestination = () => {
+    if (isAuthenticated) return "/";
+    if (location.pathname === "/guest") return "/guest";
+    return "/login";
+  };
+
   return (
     <header className="header">
-      <Link to={isAuthenticated ? "/" : "/login"} className="logo-link">
+      <Link to={getLogoDestination()} className="logo-link">
         <img src={logo} alt="V'Share Logo" className="logo-image" />
         <span className="logo-text">V'Share</span>
       </Link>
