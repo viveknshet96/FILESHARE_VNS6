@@ -39,7 +39,6 @@ exports.createFolder = async (req, res) => {
 
 // Upload files into a specific folder
 // Replace the existing uploadFiles function in itemController.js with this one
-
 exports.uploadFiles = async (req, res) => {
     const { parentId } = req.body;
     try {
@@ -47,40 +46,26 @@ exports.uploadFiles = async (req, res) => {
             return res.status(400).json({ msg: 'No files uploaded.' });
         }
 
-        const newFileItems = [];
-        for (const file of req.files) {
-            let newName = file.originalname;
-            let counter = 1;
-            const nameParts = newName.lastIndexOf('.') > -1 ? {
-                base: newName.substring(0, newName.lastIndexOf('.')),
-                ext: newName.substring(newName.lastIndexOf('.'))
-            } : { base: newName, ext: '' };
+        const fileItems = req.files.map(file => ({
+            name: file.originalname,
+            type: 'file',
+            parentId: parentId || null,
+            fileName: file.filename,
+            path: file.path,
+            size: file.size,
+            owner: req.user.id,
+        }));
 
-            // Check if a file with the same name already exists in this folder for this user
-            while (await Item.findOne({ name: newName, parentId: parentId || null, owner: req.user.id })) {
-                // If it exists, append a number and check again
-                newName = `${nameParts.base} (${counter})${nameParts.ext}`;
-                counter++;
-            }
-            
-            newFileItems.push({
-                name: newName,
-                type: 'file',
-                parentId: parentId || null,
-                fileName: file.filename,
-                path: file.path,
-                size: file.size,
-                owner: req.user.id,
-            });
-        }
-
-        const insertedFiles = await Item.insertMany(newFileItems);
+        const insertedFiles = await Item.insertMany(fileItems);
         res.status(201).json(insertedFiles);
     } catch (err) {
+        // This catch block will be triggered by the database's unique index
+        // when a duplicate filename is uploaded.
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).send('Server Error: Upload failed, possibly due to a duplicate filename.');
     }
 };
+            
 
 // UPDATED: Creates a single 'Share' document for multiple items
 exports.createShareLink = async (req, res) => {
