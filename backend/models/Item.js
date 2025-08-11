@@ -25,12 +25,11 @@ const ItemSchema = new mongoose.Schema({
     },
     size: {
         type: Number,
+    },owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
-    // ,owner: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'User',
-    //     required: true,
-    // },
     
     createdAt: {
         type: Date,
