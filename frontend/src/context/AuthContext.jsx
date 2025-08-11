@@ -64,14 +64,13 @@ export const AuthProvider = ({ children }) => {
         loadUser();
     }, []);
 
-    // Handles the complete login flow
-    const login = async (formData, navigate) => {
+   const login = async (formData, navigate) => {
         try {
             const res = await axios.post('/api/auth/login', formData);
             dispatch({ type: 'AUTH_SUCCESS', payload: res.data });
-            await loadUser(); // Immediately load user data
+            await loadUser(); // 1. Load user data
             toast.success('Login successful!');
-            navigate('/'); // Redirect to the main page
+            navigate('/'); // 2. Force the redirect to the main page
         } catch (err) {
             const errorMsg = err.response?.data?.msg || 'Login failed.';
             toast.error(errorMsg);
@@ -79,12 +78,11 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Handles the registration flow
     const register = async (formData, navigate) => {
         try {
             await axios.post('/api/auth/register', formData);
             toast.success('Registration successful! Please log in.');
-            navigate('/login'); // Redirect to the login page
+            navigate('/login'); // Redirect to login after successful registration
         } catch (err) {
             const errorMsg = err.response?.data?.errors ? err.response.data.errors[0].msg : err.response?.data?.msg;
             toast.error(errorMsg || 'Registration failed.');
