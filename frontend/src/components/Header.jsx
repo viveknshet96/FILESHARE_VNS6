@@ -15,7 +15,7 @@ const Header = () => {
   };
 
   const renderAuthLinks = () => {
-    // If on the login or register page, show the auth links
+    // If on the login or register page, always show the public links
     if (location.pathname === "/login" || location.pathname === "/register") {
       return (
         <div className="auth-links">
@@ -24,7 +24,7 @@ const Header = () => {
         </div>
       );
     }
-    // If on the guest page, show the guest info
+    // If on the guest page, always show the guest info
     if (location.pathname === "/guest") {
       return (
         <div className="header-user-info">
@@ -35,19 +35,24 @@ const Header = () => {
         </div>
       );
     }
-    // If authenticated and the user object is loaded, show the user info
-    if (isAuthenticated && user) {
-      return (
-        <div className="header-user-info">
-          <span>Welcome, {user.name}</span>
-          <button onClick={onLogout} className="btn btn-secondary">
-            Logout
-          </button>
-        </div>
-      );
+    // If the user is authenticated...
+    if (isAuthenticated) {
+      // ...and we have their data, show the welcome message and logout button.
+      if (user) {
+        return (
+          <div className="header-user-info">
+            <span>Welcome, {user.name}</span>
+            <button onClick={onLogout} className="btn btn-secondary">
+              Logout
+            </button>
+          </div>
+        );
+      }
+      // ✅ FIX: If authenticated but the user object is still loading, show nothing.
+      return null;
     }
-    // Fallback for any other case (e.g., loading user but not yet available)
-    // Or if the user is not authenticated and not on an auth/guest page
+    
+    // Fallback for any other case (user is not authenticated and not on a special page)
     return (
       <div className="auth-links">
         <Link to="/login">Login</Link>
