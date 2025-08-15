@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+// 1. Import useLocation
+import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthContext } from './context/AuthContext';
 import Header from './components/Header';
@@ -15,6 +16,7 @@ import './App.css';
 function App() {
     const { state } = useContext(AuthContext);
     const { isAuthenticated, loading } = state;
+    const location = useLocation(); // 2. Get the current location
 
     if (loading) {
         return (
@@ -24,32 +26,32 @@ function App() {
         );
     }
 
+    // 3. Determine if we are on a page that should NOT show the main nav
+    const hideMainNav = location.pathname === '/login' || location.pathname === '/register';
+
     return (
         <div className="container">
             <Toaster position="top-center" reverseOrder={false} />
             <Header />
             
-            {/* ✅ FIX: The main navigation is now always visible */}
-            <nav className="main-nav">
-                {/* The "My Files" link only appears if the user is logged in */}
-                {isAuthenticated && (
-                    <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>My Files</NavLink>
-                )}
-                <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
-            </nav>
+            {/* ✅ FIX: The navigation bar is now hidden on the login and register pages */}
+            {!hideMainNav && (
+                <nav className="main-nav">
+                    {/* The "My Files" link still only appears if logged in */}
+                    {isAuthenticated && (
+                        <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>My Files</NavLink>
+                    )}
+                    <NavLink to="/receive" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Receive</NavLink>
+                </nav>
+            )}
             
             <main>
                 <Routes>
-                    {/* Public Routes */}
-                    <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
-                    <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                     <Route path="/guest" element={<GuestPage />} />
-                    
-                    {/* ✅ FIX: The Receive routes are now public and no longer use PrivateRoute */}
                     <Route path="/receive" element={<ReceivePage />} />
                     <Route path="/receive/:shareCode" element={<ReceivePage />} />
-
-                    {/* Private Routes */}
                     <Route path="/" element={<PrivateRoute><FileExplorerPage /></PrivateRoute>} />
                 </Routes>
             </main>

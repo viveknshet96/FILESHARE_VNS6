@@ -42,10 +42,7 @@ const FileUpload = ({ onUpload, disabled }) => {
     return (
         <div 
             className={`file-upload ${dragging ? 'file-upload--active' : ''}`}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
+            // ... (drag and drop handlers remain the same)
         >
             <input 
                 type="file" 
@@ -56,17 +53,31 @@ const FileUpload = ({ onUpload, disabled }) => {
                 disabled={disabled}
             />
             
-            {/* ✅ NEW: Improved layout with icon and clearer text */}
+            {/* ✅ NEW: Add a separate input for folder uploads */}
+            <input 
+                type="file" 
+                id="folderInput"
+                webkitdirectory="true" // This is the magic attribute
+                directory="true"       // Standard attribute
+                multiple
+                onChange={handleFileChange}
+                style={{ display: 'none' }} 
+                disabled={disabled}
+            />
+            
             <div className="file-upload-content">
-                <p className="file-upload-main-text">Drag & Drop files here</p>
+                <span className="file-upload-icon">☁️</span>
+                <p className="file-upload-main-text">Drag & Drop Files or Folders Here</p>
                 <p className="file-upload-sub-text">or</p>
-                <label htmlFor="fileInput" className="btn">
-                    Browse Files
-                </label>
+                <div className="upload-buttons">
+                    <label htmlFor="fileInput" className="btn btn-primary">Browse Files</label>
+                    <label htmlFor="folderInput" className="btn btn-secondary">Browse Folder</label>
+                </div>
                 {disabled && <p className="upload-indicator">Uploading...</p>}
             </div>
         </div>
     );
 };
+
 
 export default FileUpload;

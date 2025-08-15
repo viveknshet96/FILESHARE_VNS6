@@ -16,4 +16,6 @@ router.post('/folder', guestController.createGuestFolder);
 // @desc    Create a share link for guest files (no auth required)
 router.post('/share', guestController.createGuestShareLink);
 
+router.get('/share/:code/download/folder/:folderId', guestController.downloadSharedFolderAsZip);
+
 module.exports = router;

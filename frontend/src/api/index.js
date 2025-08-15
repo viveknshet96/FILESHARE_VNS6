@@ -18,11 +18,19 @@ export const getItems = (parentId = null) => {
 export const createFolder = (name, parentId = null) => {
     return axios.post('/api/items/folder', { name, parentId });
 };
-
 export const uploadFiles = (files, parentId = null, onUploadProgress) => {
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-    if (parentId) formData.append('parentId', parentId);
+    
+    // We now loop through the FileList object
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+        // ✅ NEW: Send the file's relative path
+        formData.append('paths', files[i].webkitRelativePath || files[i].name);
+    }
+
+    if (parentId) {
+        formData.append('parentId', parentId);
+    }
 
     return axios.post('/api/items/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -74,4 +82,8 @@ export const uploadGuestFiles = (files, parentId = null, onUploadProgress) => {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress,
     });
+};
+
+export const getFolderDownloadUrl = (code, folderId) => {
+    return `${axios.defaults.baseURL}/api/guest/share/${code}/download/folder/${folderId}`;
 };
