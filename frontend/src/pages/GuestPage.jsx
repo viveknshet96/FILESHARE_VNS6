@@ -21,7 +21,7 @@ const GuestPage = () => {
             const response = await getGuestItems(folderId);
             setItems(response.data);
         } catch (error) {
-            toast.error('Failed to load items.');
+            toast.error('Failed to load guest items.');
         } finally {
             setIsLoading(false);
         }
@@ -90,11 +90,14 @@ const GuestPage = () => {
         }
     };
 
-    // ✅ NEW: Function to remove a file from the current session's list
-    const handleDeleteItem = (itemId) => {
-        setItems(currentItems => currentItems.filter(item => item._id !== itemId));
-        setSelectedItems(currentSelected => currentSelected.filter(id => id !== itemId));
-        toast.success('Item removed from this session.');
+    // This delete function only removes items from the current session view
+    const handleDeleteSelection = () => {
+        if (selectedItems.length === 0) {
+            return toast.error('Please select items to remove.');
+        }
+        setItems(currentItems => currentItems.filter(item => !selectedItems.includes(item._id)));
+        setSelectedItems([]);
+        toast.success(`${selectedItems.length} item(s) removed from session.`);
     };
 
     return (
@@ -123,11 +126,18 @@ const GuestPage = () => {
 
             <div className="share-button-container">
                  <button 
-                    className="btn btn-success" 
+                    className="btn btn-primary" 
                     onClick={handleCreateShareFromSelection}
                     disabled={selectedItems.length === 0}
                 >
-                    Share ({selectedItems.length}) Selected
+                    Share ({selectedItems.length})
+                </button>
+                <button 
+                    className="btn btn-danger"
+                    onClick={handleDeleteSelection}
+                    disabled={selectedItems.length === 0}
+                >
+                    Delete ({selectedItems.length})
                 </button>
             </div>
             
@@ -137,7 +147,6 @@ const GuestPage = () => {
                     onFolderClick={handleFolderClick}
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
-                    onDelete={handleDeleteItem} // ✅ Pass the delete handler
                 />
             }
             

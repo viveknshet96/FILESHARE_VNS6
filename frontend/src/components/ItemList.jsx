@@ -53,14 +53,14 @@ const ItemList = ({ items, onFolderClick, onDelete, selectedItems = [], onSelect
                                 Open
                             </button>
                         )}
-                        {onDelete && (
+                        {/* {onDelete && (
                             <button 
                                 onClick={(e) => handleActionClick(e, () => onDelete(item._id))} 
                                 className="btn btn-danger"
                             >
                                 Delete
                             </button>
-                        )}
+                        )} */}
                     </div>
                 </div>
             ))}
