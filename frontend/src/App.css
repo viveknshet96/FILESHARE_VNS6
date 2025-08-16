@@ -1238,3 +1238,43 @@ img {
     width: 90%;
     max-width: 400px;
 }
+/* Add these styles to App.css */
+.upload-progress-container {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+}
+.upload-progress-container h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+.progress-item {
+    margin-bottom: 0.75rem;
+}
+.progress-filename {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+.progress-bar-background {
+    width: 100%;
+    height: 24px;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius-full);
+    overflow: hidden;
+}
+.progress-bar-foreground {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: var(--border-radius-full);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.2s ease-in-out;
+}
