@@ -1,31 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import FileUpload from '../components/FileUpload';
-import ShareModal from '../components/ShareModal';
-import Loader from '../components/Loader';
+import { getGuestItems, createGuestFolder, uploadGuestFiles, createGuestShareLink } from '../api';
 import ItemList from '../components/ItemList';
-// ✅ FIX: Import all necessary functions from the central api file
-import { createGuestShareLink, uploadGuestFiles } from '../api';
-
-// The local uploadGuestFiles function is now removed from here
+import FileUpload from '../components/FileUpload';
+import Loader from '../components/Loader';
+import ShareModal from '../components/ShareModal';
 
 const GuestPage = () => {
-    const [shareInfo, setShareInfo] = useState({ isOpen: false, code: null });
+    const [items, setItems] = useState([]);
+    const [currentFolder, setCurrentFolder] = useState(null);
+    const [history, setHistory] = useState([{ _id: null, name: 'Guest Files' }]);
     const [isLoading, setIsLoading] = useState(false);
-    const [uploadedItems, setUploadedItems] = useState([]);
+    const [shareInfo, setShareInfo] = useState({ isOpen: false, code: null });
     const [selectedItems, setSelectedItems] = useState([]);
 
-    const handleGuestUpload = async (files) => {
-        if (!files || files.length === 0) return;
+    const loadItems = async (folderId) => {
+        setIsLoading(true);
+        setSelectedItems([]); 
+        try {
+            const response = await getGuestItems(folderId);
+            setItems(response.data);
+        } catch (error) {
+            toast.error('Failed to load items.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadItems(currentFolder);
+    }, [currentFolder]);
+
+    const handleFolderClick = (folder) => {
+        setCurrentFolder(folder._id);
+        setHistory(prevHistory => [...prevHistory, folder]);
+    };
+
+    const handleBreadcrumbClick = (folderId, index) => {
+        setCurrentFolder(folderId);
+        setHistory(prevHistory => prevHistory.slice(0, index + 1));
+    };
+    
+    const handleCreateFolder = async () => {
+        const folderName = prompt('Enter folder name:');
+        if (folderName) {
+            try {
+                await createGuestFolder(folderName, currentFolder);
+                toast.success('Folder created!');
+                loadItems(currentFolder);
+            } catch (error) {
+                toast.error(error.response?.data?.msg || 'Failed to create folder.');
+            }
+        }
+    };
+    
+    const handleUpload = async (files) => {
         setIsLoading(true);
         try {
-            // Use the imported uploadGuestFiles function
-            const uploadResponse = await uploadGuestFiles(Array.from(files));
-            setUploadedItems(uploadResponse.data);
-            setSelectedItems(uploadResponse.data.map(item => item._id));
-            toast.success('Files uploaded! Ready to share.');
-        } catch (error) {
-            toast.error('Something went wrong during upload.');
+            await uploadGuestFiles(Array.from(files), currentFolder);
+            toast.success('Files uploaded!');
+            loadItems(currentFolder);
+        } catch(error) {
+            toast.error('Upload failed.');
         } finally {
             setIsLoading(false);
         }
@@ -40,33 +76,53 @@ const GuestPage = () => {
             }
         });
     };
-    
+
     const handleCreateShareFromSelection = async () => {
         if (selectedItems.length === 0) {
-            return toast.error('Please select at least one file to share.');
+            return toast.error('Please select at least one item to share.');
         }
         try {
-            // Use the public guest share function
-            const shareResponse = await createGuestShareLink(selectedItems);
-            setShareInfo({ isOpen: true, code: shareResponse.data.code });
-            setUploadedItems([]);
+            const response = await createGuestShareLink(selectedItems);
+            setShareInfo({ isOpen: true, code: response.data.code });
             setSelectedItems([]);
         } catch (error) {
             toast.error('Failed to create share link.');
         }
     };
 
+    // ✅ NEW: Function to remove a file from the current session's list
+    const handleDeleteItem = (itemId) => {
+        setItems(currentItems => currentItems.filter(item => item._id !== itemId));
+        setSelectedItems(currentSelected => currentSelected.filter(id => id !== itemId));
+        toast.success('Item removed from this session.');
+    };
+
     return (
         <div>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                <h2>Send Files as a Guest</h2>
-                <p>Files uploaded here will be automatically deleted after 24 hours.</p>
+                <h2>Guest Mode</h2>
+                <p>All files and folders created here will be automatically deleted after 24 hours.</p>
+            </div>
+            <div className="toolbar">
+                <div className="breadcrumbs">
+                    {history.map((folder, index) => (
+                        <span key={folder._id || 'root'}>
+                            <button onClick={() => handleBreadcrumbClick(folder._id, index)}>
+                                {folder.name}
+                            </button>
+                            {index < history.length - 1 && ' / '}
+                        </span>
+                    ))}
+                </div>
+                <div className="toolbar-actions">
+                    <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
+                </div>
             </div>
             
-            <FileUpload onUpload={handleGuestUpload} disabled={isLoading} />
+            <FileUpload onUpload={handleUpload} disabled={isLoading} />
 
             <div className="share-button-container">
-                <button 
+                 <button 
                     className="btn btn-success" 
                     onClick={handleCreateShareFromSelection}
                     disabled={selectedItems.length === 0}
@@ -75,15 +131,15 @@ const GuestPage = () => {
                 </button>
             </div>
             
-            {isLoading && <Loader />}
-
-            {uploadedItems.length > 0 && !isLoading && (
+            {isLoading ? <Loader /> : 
                 <ItemList 
-                    items={uploadedItems}
+                    items={items} 
+                    onFolderClick={handleFolderClick}
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
+                    onDelete={handleDeleteItem} // ✅ Pass the delete handler
                 />
-            )}
+            }
             
             {shareInfo.isOpen && (
                 <ShareModal 
