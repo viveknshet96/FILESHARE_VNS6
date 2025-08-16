@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
-import logo from "../assets/logo.png";
+import logo from "../assets/transfer.gif";
 
 const Header = () => {
   const { state, dispatch } = useContext(AuthContext);
