@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, 'react';
+import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getItems, createFolder, uploadFiles, createShareLink, deleteItem } from '../api';
 import ItemList from '../components/ItemList';
@@ -26,7 +27,6 @@ const FileExplorerPage = () => {
             const response = await getItems(folderId);
             setItems(response.data);
         } catch (error) {
-            // Silently fail on load; user will see an empty folder.
             console.error("Failed to load items.", error);
         } finally {
             setIsLoading(false);
@@ -34,7 +34,6 @@ const FileExplorerPage = () => {
     };
 
     useEffect(() => {
-        // Only load items if the user is authenticated.
         if (state.isAuthenticated) {
             loadItems(currentFolder);
         }
@@ -66,12 +65,10 @@ const FileExplorerPage = () => {
     const handleUpload = async (files) => {
         setIsLoading(true);
         setUploadProgress({});
-
         const progressHandler = (progressEvent) => {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             setUploadProgress({ 'Uploading...': percentCompleted });
         };
-        
         try {
             await uploadFiles(Array.from(files), currentFolder, progressHandler);
             toast.success('Files uploaded successfully!');
@@ -107,43 +104,24 @@ const FileExplorerPage = () => {
         }
     };
 
-    const handleDeleteItem = async (itemId) => {
-        if (!window.confirm('Are you sure you want to permanently delete this item?')) {
-            return;
-        }
-        try {
-            await deleteItem(itemId);
-            setItems(currentItems => currentItems.filter(item => item._id !== itemId));
-            toast.success('Item deleted!');
-        } catch (error) {
-            toast.error(error.response?.data?.msg || 'Could not delete the item.');
-        }
-    };
-
-    // ✅ NEW: Function to handle deleting all selected items
     const handleDeleteSelection = async () => {
         if (selectedItems.length === 0) {
             return toast.error('Please select items to delete.');
         }
-
         if (!window.confirm(`Are you sure you want to permanently delete ${selectedItems.length} item(s)?`)) {
             return;
         }
-        
         try {
-            // Call the delete API for each selected item
             await Promise.all(selectedItems.map(id => deleteItem(id)));
-            
-            // Refresh the file list to show the changes
-            await loadItems(currentFolder);
             toast.success(`${selectedItems.length} item(s) deleted.`);
-            setSelectedItems([]); // Clear the selection
+            await loadItems(currentFolder);
+            setSelectedItems([]);
         } catch (error) {
             toast.error('Failed to delete items.');
         }
     };
 
- return (
+    return (
         <div>
             <div className="toolbar">
                 <div className="breadcrumbs">
@@ -157,14 +135,21 @@ const FileExplorerPage = () => {
                     ))}
                 </div>
                 <div className="toolbar-actions">
-                    {/* The Delete button is REMOVED from here */}
+                    <button 
+                        className="btn btn-danger"
+                        onClick={handleDeleteSelection}
+                        disabled={selectedItems.length === 0}
+                    >
+                        Delete ({selectedItems.length})
+                    </button>
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
             </div>
             
             <FileUpload onUpload={handleUpload} disabled={isLoading} />
-
-            {/* ✅ FIX: The Delete button is MOVED here, next to the Share button */}
+            
+            <UploadProgress uploadProgress={uploadProgress} />
+            
             <div className="share-button-container">
                 <button 
                     className="btn btn-primary" 
@@ -172,13 +157,6 @@ const FileExplorerPage = () => {
                     disabled={selectedItems.length === 0}
                 >
                     Share ({selectedItems.length}) Selected
-                </button>
-                <button 
-                    className="btn btn-danger"
-                    onClick={handleDeleteSelection}
-                    disabled={selectedItems.length === 0}
-                >
-                    Delete ({selectedItems.length})
                 </button>
             </div>
 
@@ -191,7 +169,12 @@ const FileExplorerPage = () => {
                 />
             }
 
-            {shareInfo.isOpen && ( <ShareModal code={shareInfo.code} onClose={() => setShareInfo({ isOpen: false, code: null })} /> )}
+            {shareInfo.isOpen && (
+                <ShareModal 
+                    code={shareInfo.code}
+                    onClose={() => setShareInfo({ isOpen: false, code: null })}
+                />
+            )}
         </div>
     );
 };
