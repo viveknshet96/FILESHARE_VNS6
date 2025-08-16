@@ -38,8 +38,16 @@ exports.createFolder = async (req, res) => {
 };
 // Replace the existing uploadFiles function in itemController.js
 
+// Replace the existing uploadFiles function with this debug version
+// Fixed version of uploadFiles function in itemController.js
 exports.uploadFiles = async (req, res) => {
     const { parentId } = req.body;
+    
+    console.log('=== REGULAR UPLOAD DEBUG ===');
+    console.log('Raw parentId:', parentId, typeof parentId);
+    console.log('User ID:', req.user.id);
+    console.log('Files:', req.files?.map(f => f.originalname));
+    
     try {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ msg: 'No files uploaded.' });
@@ -47,6 +55,8 @@ exports.uploadFiles = async (req, res) => {
 
         const newFileItems = [];
         for (const file of req.files) {
+            console.log('\n--- Processing file:', file.originalname, '---');
+            
             let newName = file.originalname;
             let counter = 1;
             const nameParts = newName.lastIndexOf('.') > -1 ? {
@@ -54,31 +64,122 @@ exports.uploadFiles = async (req, res) => {
                 ext: newName.substring(newName.lastIndexOf('.'))
             } : { base: newName, ext: '' };
 
-            // Check if a file with the same name already exists in this folder for this user
-            while (await Item.findOne({ name: newName, parentId: parentId || null, owner: req.user.id })) {
-                // If it exists, append a number and check again
-                newName = `${nameParts.base} (${counter})${nameParts.ext}`;
-                counter++;
+            // Properly handle parentId conversion
+            let searchParentId;
+            if (parentId === null || parentId === undefined || parentId === 'null' || parentId === '') {
+                searchParentId = null;
+            } else {
+                searchParentId = parentId;
             }
             
-            newFileItems.push({
+            console.log('Converted parentId:', searchParentId, typeof searchParentId);
+
+            // Create the search query
+            const baseQuery = { 
+                parentId: searchParentId, 
+                owner: req.user.id 
+            };
+
+            // Check if a file with the same name already exists
+            let existingItem = await Item.findOne({ ...baseQuery, name: newName });
+            console.log('Initial check for', newName, '- found:', existingItem ? 'YES' : 'NO');
+            
+            while (existingItem) {
+                console.log(`Name collision for "${newName}", trying counter ${counter}`);
+                newName = `${nameParts.base} (${counter})${nameParts.ext}`;
+                counter++;
+                
+                // Safety check
+                if (counter > 100) {
+                    throw new Error(`Unable to generate unique filename for ${file.originalname}`);
+                }
+                
+                existingItem = await Item.findOne({ ...baseQuery, name: newName });
+                console.log('Checking', newName, '- found:', existingItem ? 'YES' : 'NO');
+            }
+            
+            console.log('Final filename:', newName);
+            
+            const newFileItem = {
                 name: newName,
                 type: 'file',
-                parentId: parentId || null,
+                parentId: searchParentId,
                 fileName: file.filename,
                 path: file.path,
                 size: file.size,
                 owner: req.user.id,
-            });
+            };
+            
+            console.log('File item to insert:', newFileItem);
+            newFileItems.push(newFileItem);
         }
 
-        const insertedFiles = await Item.insertMany(newFileItems);
+        console.log('\n=== INSERTING FILES ===');
+        console.log('Total files to insert:', newFileItems.length);
+
+        // Insert files one by one to handle potential race conditions better
+        const insertedFiles = [];
+        for (const fileItem of newFileItems) {
+            try {
+                const inserted = await Item.create(fileItem);
+                insertedFiles.push(inserted);
+                console.log('Successfully inserted:', inserted.name);
+            } catch (insertErr) {
+                if (insertErr.code === 11000) {
+                    console.error('Duplicate key error for:', fileItem.name, insertErr.keyValue);
+                    // Try with a new counter if we hit a race condition
+                    let retryCounter = 1;
+                    let retryName = fileItem.name;
+                    const parts = retryName.lastIndexOf('.') > -1 ? {
+                        base: retryName.substring(0, retryName.lastIndexOf('.')),
+                        ext: retryName.substring(retryName.lastIndexOf('.'))
+                    } : { base: retryName, ext: '' };
+                    
+                    // Remove existing counter if present
+                    const baseClean = parts.base.replace(/ \(\d+\)$/, '');
+                    
+                    while (retryCounter <= 10) {
+                        retryName = `${baseClean} (${retryCounter})${parts.ext}`;
+                        try {
+                            const retryItem = { ...fileItem, name: retryName };
+                            const inserted = await Item.create(retryItem);
+                            insertedFiles.push(inserted);
+                            console.log('Successfully inserted with retry name:', inserted.name);
+                            break;
+                        } catch (retryErr) {
+                            if (retryErr.code === 11000) {
+                                retryCounter++;
+                                continue;
+                            } else {
+                                throw retryErr;
+                            }
+                        }
+                    }
+                    
+                    if (retryCounter > 10) {
+                        throw new Error(`Failed to insert file after 10 retries: ${fileItem.name}`);
+                    }
+                } else {
+                    throw insertErr;
+                }
+            }
+        }
+
         res.status(201).json(insertedFiles);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('=== UPLOAD ERROR ===');
+        console.error('Error:', err.message);
+        if (err.code === 11000) {
+            console.error('Duplicate key details:', err.keyValue);
+        }
+        res.status(500).json({ 
+            msg: 'Server Error',
+            error: err.message 
+        });
     }
 };
+
+
 
 // UPDATED: Creates a single 'Share' document for multiple items
 exports.createShareLink = async (req, res) => {
