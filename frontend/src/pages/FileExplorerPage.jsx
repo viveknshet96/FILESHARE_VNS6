@@ -26,7 +26,6 @@ const FileExplorerPage = () => {
             const response = await getItems(folderId);
             setItems(response.data);
         } catch (error) {
-            // Silently fail on load; user will see an empty folder.
             console.error("Failed to load items.", error);
         } finally {
             setIsLoading(false);
@@ -34,7 +33,6 @@ const FileExplorerPage = () => {
     };
 
     useEffect(() => {
-        // Only load items if the user is authenticated.
         if (state.isAuthenticated) {
             loadItems(currentFolder);
         }
@@ -66,12 +64,10 @@ const FileExplorerPage = () => {
     const handleUpload = async (files) => {
         setIsLoading(true);
         setUploadProgress({});
-
         const progressHandler = (progressEvent) => {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             setUploadProgress({ 'Uploading...': percentCompleted });
         };
-        
         try {
             await uploadFiles(Array.from(files), currentFolder, progressHandler);
             toast.success('Files uploaded successfully!');
@@ -113,8 +109,9 @@ const FileExplorerPage = () => {
         }
         try {
             await deleteItem(itemId);
-            setItems(currentItems => currentItems.filter(item => item._id !== itemId));
             toast.success('Item deleted!');
+            // ✅ IMPROVEMENT: Refresh the list from the server to ensure 100% consistency.
+            await loadItems(currentFolder);
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Could not delete the item.');
         }
@@ -134,6 +131,9 @@ const FileExplorerPage = () => {
                     ))}
                 </div>
                 <div className="toolbar-actions">
+                    <button className="btn btn-primary" onClick={handleCreateShareFromSelection} disabled={selectedItems.length === 0}>
+                        Share ({selectedItems.length})
+                    </button>
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
             </div>
@@ -141,16 +141,6 @@ const FileExplorerPage = () => {
             <FileUpload onUpload={handleUpload} disabled={isLoading} />
             
             <UploadProgress uploadProgress={uploadProgress} />
-
-            <div className="share-button-container">
-                <button 
-                    className="btn btn-primary" 
-                    onClick={handleCreateShareFromSelection}
-                    disabled={selectedItems.length === 0}
-                >
-                    Share ({selectedItems.length}) Selected
-                </button>
-            </div>
 
             {isLoading ? <Loader /> : 
                 <ItemList 
