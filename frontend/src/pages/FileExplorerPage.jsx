@@ -134,13 +134,7 @@ const FileExplorerPage = () => {
                     ))}
                 </div>
                 <div className="toolbar-actions">
-                    <button 
-                        className="btn btn-danger"
-                        onClick={handleDeleteSelection}
-                        disabled={selectedItems.length === 0}
-                    >
-                        Delete ({selectedItems.length})
-                    </button>
+                    {/* The Delete button is REMOVED from here */}
                     <button className="btn" onClick={handleCreateFolder}>+ New Folder</button>
                 </div>
             </div>
@@ -155,7 +149,15 @@ const FileExplorerPage = () => {
                     onClick={handleCreateShareFromSelection}
                     disabled={selectedItems.length === 0}
                 >
-                    Share ({selectedItems.length}) Selected
+                    Share ({selectedItems.length})
+                </button>
+                {/* ✅ FIX: The Delete button is MOVED here, next to the Share button */}
+                <button 
+                    className="btn btn-danger"
+                    onClick={handleDeleteSelection}
+                    disabled={selectedItems.length === 0}
+                >
+                    Delete ({selectedItems.length})
                 </button>
             </div>
 
