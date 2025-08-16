@@ -38,7 +38,6 @@ exports.createFolder = async (req, res) => {
 };
 // Replace the existing uploadFiles function in itemController.js
 
-// In backend/controllers/itemController.js
 exports.uploadFiles = async (req, res) => {
     const { parentId } = req.body;
     try {
@@ -80,6 +79,7 @@ exports.uploadFiles = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
 // UPDATED: Creates a single 'Share' document for multiple items
 exports.createShareLink = async (req, res) => {
     const { itemIds } = req.body;
